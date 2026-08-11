@@ -1,0 +1,3606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Glass Finance • Real Estate ROI Analyzer</title>
+
+<style>
+:root{
+--bg:#eef4f5;
+--glass:rgba(255,255,255,.68);
+--line:rgba(31,55,66,.12);
+--ink:#17303a;
+--muted:#6f858e;
+--accent:#5c91ad;
+--good:#477e65;
+--shadow:0 24px 70px rgba(43,72,82,.12)
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+color:var(--ink);
+background:
+radial-gradient(circle at 15% 10%,#fff 0 12%,transparent 38%),
+radial-gradient(circle at 90% 20%,#d9edf2 0 10%,transparent 34%),
+linear-gradient(135deg,#edf5f6,#e6eef0);
+min-height:100vh
+}
+
+body:before{
+content:"";
+position:fixed;
+inset:-30%;
+background:
+radial-gradient(ellipse at 30% 40%,rgba(126,191,209,.18),transparent 35%),
+radial-gradient(ellipse at 70% 65%,rgba(255,255,255,.7),transparent 32%);
+animation:drift 16s ease-in-out infinite alternate;
+pointer-events:none
+}
+
+@keyframes drift{
+from{transform:translate3d(-2%,1%,0) scale(1)}
+to{transform:translate3d(3%,-2%,0) scale(1.06)}
+}
+
+.app{
+position:relative;
+max-width:1280px;
+margin:auto;
+padding:24px
+}
+
+.top{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:18px;
+margin-bottom:18px
+}
+
+.brand{
+font-weight:800;
+letter-spacing:-.03em;
+font-size:22px
+}
+
+.brand span{
+font-weight:500;
+color:var(--muted)
+}
+
+.nav{
+display:flex;
+gap:7px;
+overflow:auto
+}
+
+.nav button,
+.mode button{
+border:1px solid transparent;
+background:transparent;
+color:var(--muted);
+padding:10px 14px;
+border-radius:14px;
+font-weight:700;
+cursor:pointer;
+white-space:nowrap
+}
+
+.nav button.active,
+.nav button:hover,
+.mode button.on{
+background:rgba(255,255,255,.72);
+border-color:var(--line);
+color:var(--ink);
+box-shadow:0 8px 22px rgba(40,70,80,.08)
+}
+
+.glass{
+background:var(--glass);
+backdrop-filter:blur(24px);
+-webkit-backdrop-filter:blur(24px);
+border:1px solid rgba(255,255,255,.82);
+box-shadow:var(--shadow);
+border-radius:28px
+}
+
+.hero{
+padding:28px;
+margin-bottom:18px
+}
+
+.eyebrow{
+font-size:11px;
+font-weight:800;
+letter-spacing:.14em;
+color:var(--accent);
+text-transform:uppercase
+}
+
+.hero h1{
+font-size:clamp(32px,5vw,58px);
+letter-spacing:-.055em;
+margin:8px 0 6px
+}
+
+.hero p{
+color:var(--muted);
+margin:0;
+max-width:700px
+}
+
+.mode{
+display:flex;
+gap:6px;
+margin-top:22px;
+padding:5px;
+background:rgba(235,243,245,.7);
+border-radius:17px;
+width:max-content
+}
+
+.grid{
+display:grid;
+grid-template-columns:1.5fr 1fr;
+gap:18px
+}
+
+.panel{
+padding:22px
+}
+
+.metrics{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px
+}
+
+.metric{
+padding:18px;
+border:1px solid var(--line);
+background:rgba(255,255,255,.45);
+border-radius:20px
+}
+
+.metric small{
+color:var(--muted);
+font-weight:700;
+font-size:10px;
+letter-spacing:.1em
+}
+
+.metric strong{
+display:block;
+font-size:25px;
+margin-top:7px;
+letter-spacing:-.03em
+}
+
+h2{
+margin:0 0 16px;
+font-size:20px;
+letter-spacing:-.025em
+}
+
+h3{
+font-size:12px;
+letter-spacing:.12em;
+color:var(--muted);
+margin:22px 0 10px
+}
+
+.form-section{
+border-top:1px solid var(--line);
+padding-top:8px
+}
+
+.input-row{
+display:grid;
+grid-template-columns:1fr 150px;
+align-items:center;
+gap:12px;
+margin:9px 0
+}
+
+.input-row label{
+font-size:13px;
+color:#49616a
+}
+
+.input-row input{
+width:100%;
+padding:11px 12px;
+border:1px solid var(--line);
+border-radius:13px;
+background:rgba(255,255,255,.72);
+color:var(--ink);
+font:inherit;
+font-weight:700;
+outline:none
+}
+
+.input-row input:focus{
+border-color:var(--accent);
+box-shadow:0 0 0 4px rgba(92,145,173,.12)
+}
+
+.chartbox{
+height:290px;
+padding:10px;
+border:1px solid var(--line);
+border-radius:20px;
+background:rgba(255,255,255,.38)
+}
+
+svg{
+width:100%;
+height:100%
+}
+
+.gridline{
+stroke:rgba(80,105,115,.13);
+stroke-width:1
+}
+
+.path{
+fill:none;
+stroke:#5c91ad;
+stroke-width:4;
+stroke-linecap:round;
+stroke-linejoin:round
+}
+
+.eq{
+fill:none;
+stroke:#477e65;
+stroke-width:3;
+stroke-linecap:round;
+stroke-linejoin:round;
+stroke-dasharray:8 7
+}
+
+.legend{
+display:flex;
+gap:18px;
+font-size:11px;
+color:var(--muted);
+margin:10px 2px
+}
+
+.dot{
+display:inline-block;
+width:8px;
+height:8px;
+border-radius:50%;
+background:#5c91ad;
+margin-right:5px
+}
+
+.dot.eqd{
+background:#477e65
+}
+
+.tablewrap{
+overflow:auto;
+border:1px solid var(--line);
+border-radius:18px
+}
+
+.table{
+width:100%;
+border-collapse:collapse;
+font-size:12px;
+min-width:760px
+}
+
+.table th,
+.table td{
+text-align:right;
+padding:11px;
+border-bottom:1px solid var(--line)
+}
+
+.table th{
+color:var(--muted);
+font-size:10px;
+letter-spacing:.08em
+}
+
+.table th:first-child,
+.table td:first-child{
+text-align:left
+}
+
+.table tr:last-child td{
+border-bottom:0
+}
+
+.score{
+display:flex;
+gap:18px;
+align-items:center
+}
+
+.ring{
+width:105px;
+height:105px;
+border-radius:50%;
+display:grid;
+place-items:center;
+background:conic-gradient(#5c91ad 0 70%,#dce7eb 70% 100%);
+flex:none
+}
+
+.ring:after{
+content:"";
+position:absolute;
+width:79px;
+height:79px;
+border-radius:50%;
+background:#eef4f5
+}
+
+.ring>span{
+position:relative;
+z-index:1;
+font-size:25px;
+font-weight:800
+}
+
+.score b{
+font-size:17px
+}
+
+.muted{
+color:var(--muted);
+font-size:13px;
+line-height:1.55
+}
+
+.linkbtn{
+border:0;
+background:none;
+color:var(--accent);
+font-weight:800;
+cursor:pointer;
+padding:0
+}
+
+.list{
+display:grid;
+gap:8px
+}
+
+.field,
+.mini,
+.assump-row,
+.scenario-row{
+display:flex;
+justify-content:space-between;
+gap:10px;
+padding:10px 0;
+border-bottom:1px solid var(--line);
+font-size:12px
+}
+
+.field:last-child,
+.mini:last-child,
+.assump-row:last-child{
+border-bottom:0
+}
+
+.field span,
+.mini span,
+.assump-row span,
+.scenario-row span{
+color:var(--muted)
+}
+
+.scenarios{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px
+}
+
+.scenario-card{
+padding:18px;
+border:1px solid var(--line);
+border-radius:20px;
+background:rgba(255,255,255,.42)
+}
+
+.scenario-card h3{
+margin:0 0 8px
+}
+
+.big{
+font-size:32px;
+font-weight:800;
+letter-spacing:-.04em
+}
+
+.scenario-card small{
+color:var(--muted);
+font-size:9px;
+font-weight:800
+}
+
+.sensitivity-row{
+display:grid;
+grid-template-columns:170px 1fr 70px;
+gap:10px;
+align-items:center;
+padding:9px 0;
+font-size:12px
+}
+
+.bar{
+height:8px;
+border-radius:20px;
+background:#dfe9eb;
+overflow:hidden
+}
+
+.bar i{
+display:block;
+height:100%;
+background:linear-gradient(90deg,#86b9c9,#5c91ad);
+border-radius:20px
+}
+
+.assumptions{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px
+}
+
+.assump{
+border:1px solid var(--line);
+border-radius:18px;
+padding:14px;
+background:rgba(255,255,255,.35)
+}
+
+.tuner{
+margin-top:18px;
+padding:17px;
+border:1px solid var(--line);
+border-radius:20px;
+background:rgba(255,255,255,.42)
+}
+
+.tunerhead{
+display:flex;
+justify-content:space-between
+}
+
+.tuner input{
+width:100%;
+accent-color:#5c91ad
+}
+
+.tunerresult{
+display:flex;
+justify-content:space-between;
+margin-top:8px
+}
+
+.tunerresult b{
+font-size:22px
+}
+
+.compare{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px
+}
+
+.comparecard{
+border:1px solid var(--line);
+border-radius:20px;
+padding:18px;
+background:rgba(255,255,255,.4)
+}
+
+.comparecard h3{
+margin:0 0 12px;
+color:var(--ink);
+letter-spacing:0
+}
+
+.winner{
+margin-top:14px;
+padding:14px;
+border-radius:15px;
+background:rgba(92,145,173,.1);
+color:#49616a;
+font-size:13px
+}
+
+.btn{
+border:1px solid var(--line);
+background:rgba(255,255,255,.7);
+padding:11px 15px;
+border-radius:14px;
+font-weight:800;
+color:var(--ink);
+cursor:pointer;
+margin-right:6px
+}
+
+.view.hidden{
+display:none
+}
+
+.footer{
+color:var(--muted);
+font-size:11px;
+text-align:center;
+padding:18px
+}
+
+.modal.hidden{
+display:none
+}
+
+.modal{
+position:fixed;
+inset:0;
+z-index:10
+}
+
+.modal-backdrop{
+position:absolute;
+inset:0;
+background:rgba(20,40,46,.25);
+backdrop-filter:blur(8px)
+}
+
+.modalbox{
+position:relative;
+max-width:560px;
+margin:12vh auto;
+padding:24px;
+background:#f7fbfc;
+border:1px solid white;
+border-radius:24px;
+box-shadow:0 30px 100px rgba(20,40,46,.25)
+}
+
+@media(max-width:900px){
+.grid{grid-template-columns:1fr}
+.metrics{grid-template-columns:repeat(2,1fr)}
+.scenarios{grid-template-columns:1fr}
+.assumptions,.compare{grid-template-columns:1fr}
+.top{align-items:flex-start;flex-direction:column}
+}
+
+@media(max-width:600px){
+.app{padding:12px}
+.metrics{grid-template-columns:1fr 1fr}
+.input-row{grid-template-columns:1fr 120px}
+.hero{padding:22px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="top">
+
+<div class="brand">
+Glass Finance
+<span>• Real Estate Analyzer</span>
+</div>
+
+<nav class="nav">
+
+<button class="active" data-view="decision">
+Overview
+</button>
+
+<button data-view="calculator">
+Inputs
+</button>
+
+<button data-view="yearly">
+Year-by-Year
+</button>
+
+<button data-view="scenario">
+Scenarios
+</button>
+
+<button data-view="compare">
+Compare
+</button>
+
+<button data-view="assumptions">
+Assumptions
+</button>
+
+</nav>
+
+</header>
+
+
+<section class="glass hero">
+
+<div class="eyebrow">
+Investment Decision Engine
+</div>
+
+<h1>
+Know the deal before you buy it.
+</h1>
+
+<p>
+Change an assumption and the entire investment model recalculates instantly.
+</p>
+
+<div class="mode">
+
+<button class="on" data-view="decision">
+Decision
+</button>
+
+<button data-view="calculator">
+Calculator
+</button>
+
+<button data-view="scenario">
+Stress Test
+</button>
+
+</div>
+
+</section>
+
+
+<section id="decision" class="view">
+
+<div class="grid">
+
+<div class="glass panel">
+
+<h2>
+Investment snapshot
+</h2>
+
+
+<div class="metrics">
+
+<div class="metric">
+<small>CAP RATE</small>
+<strong id="cap">—</strong>
+</div>
+
+<div class="metric">
+<small>IRR</small>
+<strong id="irr">—</strong>
+</div>
+
+<div class="metric">
+<small>CASH / MONTH</small>
+<strong id="cashflow">—</strong>
+</div>
+
+<div class="metric">
+<small>COC</small>
+<strong id="coc">—</strong>
+</div>
+
+</div>
+
+
+<h3>
+VALUE & EQUITY
+</h3>
+
+
+<div class="metrics">
+
+<div class="metric">
+<small>EQUITY MULTIPLE</small>
+<strong id="multiple">—</strong>
+</div>
+
+<div class="metric">
+<small>EXIT EQUITY</small>
+<strong id="equity">—</strong>
+</div>
+
+<div class="metric">
+<small>DSCR</small>
+<strong id="dscr">—</strong>
+</div>
+
+<div class="metric">
+<small>BREAK-EVEN OCC.</small>
+<strong id="breakEven">—</strong>
+</div>
+
+</div>
+
+
+<h3>
+VALUE PATH
+</h3>
+
+
+<div class="chartbox" id="chart"></div>
+
+
+<div class="legend">
+
+<span>
+<i class="dot"></i>
+Property value
+</span>
+
+<span>
+<i class="dot eqd"></i>
+Equity
+</span>
+
+</div>
+
+
+<div class="tuner">
+
+<div class="tunerhead">
+
+<b>
+Investment tuner
+</b>
+
+<b id="tunerLabel">
+BASE
+</b>
+
+</div>
+
+
+<p class="muted" id="tunerText">
+Drag this to stress-test the entire investment.
+</p>
+
+
+<input
+id="tuner"
+type="range"
+min="0"
+max="100"
+value="50"
+>
+
+
+<div class="tunerresult">
+
+<span>
+Modeled IRR
+</span>
+
+<b id="tunerIrr">
+—
+</b>
+
+</div>
+
+</div>
+
+</div>
+
+
+<aside class="glass panel">
+
+<div class="score">
+
+<div class="ring" id="scoreRing">
+<span id="scoreValue">—</span>
+</div>
+
+<div>
+
+<div class="eyebrow">
+DEAL SCORE
+</div>
+
+<b id="scoreLabel">
+—
+</b>
+
+<p class="muted" id="scoreReason">
+—
+</p>
+
+<button class="linkbtn" id="whyScore">
+See why this scores →
+</button>
+
+</div>
+
+</div>
+
+
+<h3>
+KEY ASSUMPTIONS
+</h3>
+
+<div class="list" id="keyAssumptions"></div>
+
+
+<h3>
+SCENARIO IRR
+</h3>
+
+<div class="list" id="miniScenarios"></div>
+
+
+<h3>
+MODEL NOTE
+</h3>
+
+<p class="muted" id="whyItWorks">
+—
+</p>
+
+
+<button class="btn" data-view="calculator">
+Edit assumptions
+</button>
+
+<button class="btn" id="reset">
+Reset
+</button>
+
+</aside>
+
+</div>
+
+</section>
+
+
+<section id="calculator" class="view hidden">
+
+<div class="glass panel">
+
+<h2>
+Deal inputs
+</h2>
+
+<p class="muted">
+Every field below is live. Change any value and the overview, graph, table and scenarios recalculate.
+</p>
+
+<div id="calculatorFields"></div>
+
+</div>
+
+</section>
+
+
+<section id="yearly" class="view hidden">
+
+<div class="glass panel">
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+
+<div>
+
+<h2>
+Year-by-year model
+</h2>
+
+<p class="muted">
+Operating income, debt and equity over the hold period.
+</p>
+
+</div>
+
+<b id="yearCount">
+10 YEARS
+</b>
+
+</div>
+
+
+<div class="tablewrap">
+
+<table class="table">
+
+<thead>
+
+<tr>
+
+<th>
+Year
+</th>
+
+<th>
+Property Value
+</th>
+
+<th>
+Gross Rent
+</th>
+
+<th>
+NOI
+</th>
+
+<th>
+Debt
+</th>
+
+<th>
+Equity
+</th>
+
+<th>
+Cash Flow
+</th>
+
+</tr>
+
+</thead>
+
+<tbody id="rows"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<section id="scenario" class="view hidden">
+
+<div class="glass panel">
+
+<h2>
+Scenario engine
+</h2>
+
+<p class="muted">
+The same deal under conservative, base and optimistic assumptions.
+</p>
+
+<div class="scenarios" id="scenarioCards"></div>
+
+<h3>
+SENSITIVITY
+</h3>
+
+<div id="sensitivityRows"></div>
+
+</div>
+
+</section>
+
+
+<section id="compare" class="view hidden">
+
+<div class="glass panel">
+
+<h2>
+Property comparison
+</h2>
+
+<div class="compare">
+
+<div class="comparecard">
+
+<h3 id="compareAName">
+Current Property
+</h3>
+
+<div class="field">
+<span>IRR</span>
+<b id="aIrr">—</b>
+</div>
+
+<div class="field">
+<span>Cap rate</span>
+<b id="aCap">—</b>
+</div>
+
+<div class="field">
+<span>Monthly cash</span>
+<b id="aCash">—</b>
+</div>
+
+<div class="field">
+<span>Exit equity</span>
+<b id="aEquity">—</b>
+</div>
+
+</div>
+
+
+<div class="comparecard">
+
+<h3 id="compareBName">
+Harbor View
+</h3>
+
+<div class="field">
+<span>IRR</span>
+<b id="bIrr">—</b>
+</div>
+
+<div class="field">
+<span>Cap rate</span>
+<b id="bCap">—</b>
+</div>
+
+<div class="field">
+<span>Monthly cash</span>
+<b id="bCash">—</b>
+</div>
+
+<div class="field">
+<span>Exit equity</span>
+<b id="bEquity">—</b>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="winner" id="winner">
+—
+</div>
+
+</div>
+
+</section>
+
+
+<section id="assumptions" class="view hidden">
+
+<div class="glass panel">
+
+<h2>
+Assumption map
+</h2>
+
+<div class="assumptions" id="assumptionMap"></div>
+
+</div>
+
+</section>
+
+
+<div class="footer">
+Glass Finance • Educational model • Not financial advice
+</div>
+
+</div>
+
+
+<div class="modal hidden" id="modal">
+
+<div class="modal-backdrop"></div>
+
+<div class="modalbox">
+
+<button class="btn" id="closeModal">
+Close
+</button>
+
+<div id="modalContent"></div>
+
+</div>
+
+</div>
+
+
+<script>
+
+"use strict";
+
+
+/* ================================
+   HELPERS
+================================ */
+
+const $ =
+id =>
+document.getElementById(id);
+
+
+function money(value){
+
+return "₹" +
+Math.round(
+Number(value) || 0
+).toLocaleString("en-IN");
+
+}
+
+
+function pct(value){
+
+return (
+Number(value) || 0
+).toFixed(2)
++
+"%";
+
+}
+
+
+function num(id){
+
+const element =
+$(id);
+
+if(!element){
+return 0;
+}
+
+const value =
+parseFloat(
+element.value
+);
+
+return Number.isFinite(value)
+?
+Math.max(0,value)
+:
+0;
+
+}
+
+
+/* ================================
+   DEFAULTS
+================================ */
+
+const defaults={
+
+price:5000000,
+down:20,
+closing:3,
+reno:250000,
+
+rate:8.5,
+term:20,
+points:0,
+
+rent:45000,
+vacancy:5,
+
+tax:60000,
+insurance:24000,
+
+maint:8,
+management:8,
+capex:4,
+other:12000,
+
+appreciation:4,
+rentgrowth:3,
+expensegrowth:3,
+
+hold:10,
+exitcap:6,
+selling:6
+
+};
+
+
+/* ================================
+   SECOND PROPERTY
+================================ */
+
+const compareB={
+
+name:"Harbor View",
+
+price:5600000,
+down:25,
+closing:3,
+reno:300000,
+
+rate:8.2,
+term:20,
+points:0,
+
+rent:52000,
+vacancy:5,
+
+tax:70000,
+insurance:26000,
+
+maint:8,
+management:8,
+capex:4,
+other:14000,
+
+appreciation:5,
+rentgrowth:3.2,
+expensegrowth:3,
+
+hold:10,
+exitcap:6,
+selling:6
+
+};
+
+
+/* ================================
+   INPUTS
+================================ */
+
+function getInputs(){
+
+return{
+
+price:num("price"),
+
+down:
+Math.min(
+1,
+num("down")/100
+),
+
+closing:
+num("closing")/100,
+
+reno:
+num("reno"),
+
+rate:
+num("rate"),
+
+term:
+Math.max(
+1,
+num("term")
+),
+
+points:
+num("points")/100,
+
+rent:
+num("rent"),
+
+vacancy:
+Math.min(
+.99,
+num("vacancy")/100
+),
+
+tax:
+num("tax"),
+
+insurance:
+num("insurance"),
+
+maint:
+num("maint")/100,
+
+management:
+Math.min(
+.99,
+num("management")/100
+),
+
+capex:
+num("capex")/100,
+
+other:
+num("other"),
+
+appreciation:
+(parseFloat(
+$("appreciation")?.value
+)||0)/100,
+
+rentgrowth:
+(parseFloat(
+$("rentgrowth")?.value
+)||0)/100,
+
+expensegrowth:
+(parseFloat(
+$("expensegrowth")?.value
+)||0)/100,
+
+hold:
+Math.max(
+1,
+Math.round(
+num("hold")
+)
+),
+
+exitcap:
+num("exitcap")/100,
+
+selling:
+Math.min(
+.99,
+num("selling")/100
+
+)
+
+};
+
+}
+
+
+/* ================================
+   MORTGAGE
+================================ */
+
+function mortgage(
+principal,
+rate,
+years
+){
+
+if(
+principal<=0 ||
+years<=0
+){
+return 0;
+}
+
+const n=
+years*12;
+
+const r=
+rate/100/12;
+
+if(
+r===0
+){
+return principal/n;
+}
+
+return(
+principal*r*
+Math.pow(
+1+r,
+n
+)
+)/
+(
+Math.pow(
+1+r,
+n
+)-1
+);
+
+}
+
+
+/* ================================
+   NPV
+================================ */
+
+function npv(
+rate,
+flows
+){
+
+let total=0;
+
+for(
+let i=0;
+i<flows.length;
+i++
+){
+
+total +=
+flows[i]/
+Math.pow(
+1+rate,
+i
+);
+
+}
+
+return total;
+
+}
+
+
+/* ================================
+   IRR
+================================ */
+
+function calculateIRR(
+flows
+){
+
+if(
+!flows.some(v=>v<0) ||
+!flows.some(v=>v>0)
+){
+return 0;
+}
+
+let low=-.99;
+let high=3;
+
+let lowNPV=
+npv(low,flows);
+
+let highNPV=
+npv(high,flows);
+
+if(
+lowNPV*highNPV>0
+){
+return 0;
+}
+
+for(
+let i=0;
+i<160;
+i++
+){
+
+const mid=
+(low+high)/2;
+
+const midNPV=
+npv(mid,flows);
+
+if(
+Math.abs(midNPV)
+<
+0.000001
+){
+return mid;
+}
+
+if(
+lowNPV*midNPV<=0
+){
+
+high=mid;
+highNPV=midNPV;
+
+}else{
+
+low=mid;
+lowNPV=midNPV;
+
+}
+
+}
+
+return(
+low+high
+)/2;
+
+}
+
+
+/* ================================
+   CORE MODEL
+================================ */
+
+function model(a){
+
+const loan=
+a.price*
+(1-a.down);
+
+const initial=
+a.price*a.down+
+a.price*a.closing+
+a.reno+
+loan*a.points;
+
+const payment=
+mortgage(
+loan,
+a.rate,
+a.term
+);
+
+let balance=loan;
+let propertyValue=a.price;
+let monthlyRent=a.rent;
+
+let tax=a.tax;
+let insurance=a.insurance;
+let other=a.other;
+
+const rows=[];
+const cashFlows=[
+-initial
+];
+
+
+for(
+let year=1;
+year<=a.hold;
+year++
+){
+
+propertyValue*=
+1+a.appreciation;
+
+monthlyRent*=
+1+a.rentgrowth;
+
+
+if(
+year>1
+){
+
+tax*=
+1+a.expensegrowth;
+
+insurance*=
+1+a.expensegrowth;
+
+other*=
+1+a.expensegrowth;
+
+}
+
+
+const grossRent=
+monthlyRent*12;
+
+const collected=
+grossRent*
+(1-a.vacancy);
+
+
+const maintenance=
+grossRent*a.maint;
+
+const management=
+collected*
+a.management;
+
+const capex=
+grossRent*a.capex;
+
+
+const expenses=
+maintenance+
+management+
+capex+
+tax+
+insurance+
+other;
+
+
+const noi=
+collected-
+expenses;
+
+
+let debtService=0;
+
+
+for(
+let month=0;
+month<12;
+month++
+){
+
+if(
+balance>0
+){
+
+const interest=
+balance*
+(
+a.rate/
+100/
+12
+);
+
+const principal=
+Math.min(
+balance,
+Math.max(
+0,
+payment-
+interest
+)
+);
+
+balance=
+Math.max(
+0,
+balance-
+principal
+);
+
+}
+
+debtService+=payment;
+
+}
+
+
+const cash=
+noi-
+debtService;
+
+
+rows.push({
+
+year,
+
+value:
+propertyValue,
+
+gross:
+grossRent,
+
+collected,
+
+noi,
+
+balance,
+
+equity:
+propertyValue-
+balance,
+
+cash,
+
+debtService
+
+});
+
+
+cashFlows.push(
+cash
+);
+
+}
+
+
+const last=
+rows[
+rows.length-1
+];
+
+
+const terminal=
+a.exitcap>0
+?
+last.noi/a.exitcap
+:
+last.value;
+
+
+const exitEquity=
+terminal*
+(1-a.selling)
+-
+last.balance;
+
+
+cashFlows[
+cashFlows.length-1
+]
++=
+exitEquity;
+
+
+const first=
+rows[0];
+
+
+const cap=
+a.price>0
+?
+first.noi/a.price
+:
+0;
+
+
+const coc=
+initial>0
+?
+first.cash/initial
+:
+0;
+
+
+const dscr=
+first.debtService>0
+?
+first.noi/
+first.debtService
+:
+0;
+
+
+const breakEven=
+first.gross>0
+?
+(
+(
+first.debtService+
+a.tax+
+a.insurance+
+a.other
+)/
+first.gross+
+a.maint+
+a.capex
+)/
+(
+1-a.management
+)
+:
+0;
+
+
+const positiveCash=
+cashFlows
+.slice(1)
+.reduce(
+(sum,v)=>
+sum+
+Math.max(0,v),
+0
+);
+
+
+const multiple=
+initial>0
+?
+positiveCash/
+initial
+:
+0;
+
+
+return{
+
+rows,
+
+initial,
+
+loan,
+
+exitEquity,
+
+irr:
+calculateIRR(
+cashFlows
+),
+
+cap,
+
+coc,
+
+dscr,
+
+breakEven,
+
+multiple,
+
+ltv:
+a.price>0
+?
+loan/a.price
+:
+0
+
+};
+
+}
+
+
+/* ================================
+   BUILD INPUT FIELDS
+================================ */
+
+function buildInputs(){
+
+const groups={
+
+"ACQUISITION":[
+
+["price","Purchase price"],
+["down","Down payment %"],
+["closing","Closing costs %"],
+["reno","Renovation / upfront costs"]
+
+],
+
+"FINANCING":[
+
+["rate","Mortgage rate %"],
+["term","Loan term (years)"],
+["points","Loan points %"]
+
+],
+
+"RENT & OPERATIONS":[
+
+["rent","Monthly rent"],
+["vacancy","Vacancy %"],
+["tax","Property tax / year"],
+["insurance","Insurance / year"],
+["maint","Maintenance % of gross rent"],
+["management","Management % of collected rent"],
+["capex","CapEx reserve % of gross rent"],
+["other","Other expenses / year"]
+
+],
+
+"GROWTH & EXIT":[
+
+["appreciation","Property appreciation % / year"],
+["rentgrowth","Rent growth % / year"],
+["expensegrowth","Expense growth % / year"],
+["hold","Hold period (years)"],
+["exitcap","Exit cap rate %"],
+["selling","Selling costs %"]
+
+]
+
+};
+
+
+let html="";
+
+
+Object.entries(
+groups
+).forEach(
+([
+group,
+items
+])=>{
+
+html+=
+`
+<section class="form-section">
+
+<h3>
+${group}
+</h3>
+`;
+
+
+items.forEach(
+([
+id,
+label
+])=>{
+
+html+=
+`
+<div class="input-row">
+
+<label for="${id}">
+${label}
+</label>
+
+<input
+id="${id}"
+type="number"
+step="any"
+value="${defaults[id]}"
+inputmode="decimal"
+>
+
+</div>
+`;
+
+});
+
+
+html+=
+`</section>`;
+
+});
+
+
+$("calculatorFields")
+.innerHTML=
+html;
+
+}
+
+
+/* ================================
+   SCORE
+================================ */
+
+function calculateScore(
+r
+){
+
+let s=50;
+
+
+s+=Math.max(
+-15,
+Math.min(
+15,
+(r.cap-.06)*250
+)
+);
+
+
+s+=Math.max(
+-15,
+Math.min(
+20,
+(r.irr-.08)*120
+)
+);
+
+
+s+=Math.max(
+-10,
+Math.min(
+10,
+(r.dscr-1)*15
+)
+);
+
+
+s+=Math.max(
+-10,
+Math.min(
+10,
+(.9-r.breakEven)*30
+)
+);
+
+
+return Math.max(
+0,
+Math.min(
+100,
+Math.round(s)
+)
+);
+
+}
+
+
+/* ================================
+   GRAPH
+================================ */
+
+function renderChart(
+rows
+){
+
+const box=
+$("chart");
+
+
+if(
+!box ||
+!rows.length
+){
+return;
+}
+
+
+const NS=
+"http://www.w3.org/2000/svg";
+
+
+const W=900;
+const H=260;
+
+const L=55;
+const R=18;
+const T=18;
+const B=30;
+
+
+const plotWidth=
+W-L-R;
+
+const plotHeight=
+H-T-B;
+
+
+const max=
+Math.max(
+1,
+...rows.map(
+r=>
+Math.max(
+r.value,
+r.equity
+)
+)
+);
+
+
+const x=
+i=>
+L+
+plotWidth*
+(
+i/
+Math.max(
+1,
+rows.length-1
+)
+);
+
+
+const y=
+v=>
+T+
+plotHeight*
+(
+1-
+Math.max(
+0,
+v
+)/
+max
+);
+
+
+function create(
+tag,
+attrs
+){
+
+const node=
+document.createElementNS(
+NS,
+tag
+);
+
+
+Object.entries(
+attrs
+).forEach(
+([
+key,
+value
+])=>
+node.setAttribute(
+key,
+value
+)
+);
+
+
+return node;
+
+}
+
+
+const svg=
+create(
+"svg",
+{
+viewBox:
+`0 0 ${W} ${H}`,
+preserveAspectRatio:
+"none"
+}
+);
+
+
+for(
+let i=0;
+i<4;
+i++
+){
+
+const yy=
+T+
+plotHeight*
+i/
+3;
+
+
+svg.appendChild(
+create(
+"line",
+{
+x1:L,
+y1:yy,
+x2:W-R,
+y2:yy,
+class:"gridline"
+}
+)
+);
+
+}
+
+
+svg.appendChild(
+create(
+"polyline",
+{
+points:
+rows.map(
+(r,i)=>
+`${x(i)},${y(r.value)}`
+).join(" "),
+
+class:"path"
+}
+)
+);
+
+
+svg.appendChild(
+create(
+"polyline",
+{
+points:
+rows.map(
+(r,i)=>
+`${x(i)},${y(r.equity)}`
+).join(" "),
+
+class:"eq"
+}
+)
+);
+
+
+rows.forEach(
+(
+row,
+index
+)=>{
+
+if(
+index===0 ||
+index===
+rows.length-1 ||
+index%5===0
+){
+
+const text=
+create(
+"text",
+{
+x:x(index),
+y:H-8,
+"text-anchor":
+"middle",
+fill:
+"#71838d",
+"font-size":
+"9"
+}
+);
+
+
+text.textContent=
+"Y"+
+row.year;
+
+
+svg.appendChild(
+text
+);
+
+}
+
+}
+);
+
+
+box.replaceChildren(
+svg
+);
+
+}
+
+
+/* ================================
+   YEAR TABLE
+================================ */
+
+function renderTable(
+rows
+){
+
+$("rows").innerHTML=
+rows.map(
+row=>
+`
+<tr>
+
+<td>
+${row.year}
+</td>
+
+<td>
+${money(row.value)}
+</td>
+
+<td>
+${money(row.gross)}
+</td>
+
+<td>
+${money(row.noi)}
+</td>
+
+<td>
+${money(row.balance)}
+</td>
+
+<td>
+${money(row.equity)}
+</td>
+
+<td>
+${money(row.cash)}
+</td>
+
+</tr>
+`
+).join("");
+
+}
+
+
+/* ================================
+   SCENARIOS
+================================ */
+
+function scenario(
+a,
+type
+){
+
+const s={
+...a
+};
+
+
+if(
+type===
+"Conservative"
+){
+
+s.appreciation=
+Math.max(
+0,
+s.appreciation-
+.02
+);
+
+s.rentgrowth=
+Math.max(
+0,
+s.rentgrowth-
+.015
+);
+
+s.vacancy=
+Math.min(
+.95,
+s.vacancy+
+.03
+);
+
+s.exitcap+=
+.01;
+
+}
+
+
+if(
+type===
+"Optimistic"
+){
+
+s.appreciation+=
+.02;
+
+s.rentgrowth+=
+.015;
+
+s.vacancy=
+Math.max(
+0,
+s.vacancy-
+.02
+);
+
+s.exitcap=
+Math.max(
+.01,
+s.exitcap-
+.01
+);
+
+}
+
+
+return model(s);
+
+}
+
+
+function renderScenarios(
+a
+){
+
+$("scenarioCards")
+.innerHTML=
+[
+"Conservative",
+"Base",
+"Optimistic"
+]
+.map(
+type=>{
+
+const r=
+type===
+"Base"
+?
+model(a)
+:
+scenario(
+a,
+type
+);
+
+
+const last=
+r.rows[
+r.rows.length-1
+];
+
+
+return`
+
+<div class="scenario-card">
+
+<h3>
+${type}
+</h3>
+
+<div class="big">
+${pct(
+r.irr*100
+)}
+</div>
+
+<small>
+ANNUALIZED IRR
+</small>
+
+<div class="scenario-row">
+<span>
+Exit equity
+</span>
+<b>
+${money(
+r.exitEquity
+)}
+</b>
+</div>
+
+<div class="scenario-row">
+<span>
+Cash-on-cash
+</span>
+<b>
+${pct(
+r.coc*100
+)}
+</b>
+</div>
+
+<div class="scenario-row">
+<span>
+Equity multiple
+</span>
+<b>
+${r.multiple.toFixed(2)}×
+</b>
+</div>
+
+<div class="scenario-row">
+<span>
+Final property
+</span>
+<b>
+${money(
+last.value
+)}
+</b>
+</div>
+
+</div>
+
+`;
+
+}
+)
+.join("");
+
+}
+
+
+/* ================================
+   SENSITIVITY
+================================ */
+
+function renderSensitivity(
+a
+){
+
+const base=
+model(a);
+
+
+const tests=[
+
+[
+"Property appreciation",
+
+model({
+...a,
+appreciation:
+a.appreciation+
+.01
+}).irr-
+base.irr
+],
+
+[
+"Rent growth",
+
+model({
+...a,
+rentgrowth:
+a.rentgrowth+
+.01
+}).irr-
+base.irr
+],
+
+[
+"Vacancy",
+
+base.irr-
+model({
+...a,
+vacancy:
+Math.min(
+.95,
+a.vacancy+
+.01
+)
+}).irr
+],
+
+[
+"Mortgage rate",
+
+base.irr-
+model({
+...a,
+rate:
+a.rate+
+1
+}).irr
+
+]
+
+];
+
+
+const max=
+Math.max(
+.0001,
+...tests.map(
+x=>Math.abs(x[1])
+)
+);
+
+
+$("sensitivityRows")
+.innerHTML=
+tests.map(
+([
+name,
+impact
+])=>
+`
+
+<div class="sensitivity-row">
+
+<span>
+${name}
+</span>
+
+<div class="bar">
+
+<i
+style="
+width:${Math.min(
+100,
+Math.abs(
+impact
+)/
+max*
+100
+)}%
+"
+></i>
+
+</div>
+
+<b>
+${impact>=0?"+":""}
+${pct(
+impact*100
+)}
+</b>
+
+</div>
+
+`
+).join("");
+
+}
+
+
+/* ================================
+   ASSUMPTIONS
+================================ */
+
+function renderAssumptions(
+a
+){
+
+const groups={
+
+Acquisition:[
+
+[
+"Purchase price",
+money(a.price)
+],
+
+[
+"Down payment",
+pct(a.down*100)
+],
+
+[
+"Closing costs",
+pct(a.closing*100)
+],
+
+[
+"Upfront costs",
+money(a.reno)
+]
+
+],
+
+Financing:[
+
+[
+"Mortgage rate",
+pct(a.rate)
+],
+
+[
+"Loan term",
+a.term+
+" years"
+],
+
+[
+"Points",
+pct(a.points*100)
+]
+
+],
+
+Operations:[
+
+[
+"Monthly rent",
+money(a.rent)
+],
+
+[
+"Vacancy",
+pct(a.vacancy*100)
+],
+
+[
+"Maintenance",
+pct(a.maint*100)
+],
+
+[
+"Management",
+pct(a.management*100)
+],
+
+[
+"CapEx",
+pct(a.capex*100)
+],
+
+[
+"Other expenses",
+money(a.other)
+]
+
+],
+
+"Growth & Exit":[
+
+[
+"Appreciation",
+pct(a.appreciation*100)
+],
+
+[
+"Rent growth",
+pct(a.rentgrowth*100)
+],
+
+[
+"Expense growth",
+pct(a.expensegrowth*100)
+],
+
+[
+"Hold period",
+a.hold+
+" years"
+],
+
+[
+"Exit cap",
+pct(a.exitcap*100)
+],
+
+[
+"Selling costs",
+pct(a.selling*100)
+]
+
+]
+
+};
+
+
+$("assumptionMap")
+.innerHTML=
+Object.entries(
+groups
+)
+.map(
+([
+group,
+items
+])=>
+`
+
+<div class="assump">
+
+<h3>
+${group}
+</h3>
+
+${items.map(
+item=>
+`
+
+<div class="assump-row">
+
+<span>
+${item[0]}
+</span>
+
+<b>
+${item[1]}
+</b>
+
+</div>
+
+`
+).join("")}
+
+</div>
+
+`
+)
+.join("");
+
+}
+
+
+/* ================================
+   COMPARISON
+================================ */
+
+function renderComparison(
+a,
+current
+){
+
+const other=
+model(compareB);
+
+
+$("aIrr")
+.textContent=
+pct(current.irr*100);
+
+
+$("aCap")
+.textContent=
+pct(current.cap*100);
+
+
+$("aCash")
+.textContent=
+money(
+current.rows[0].cash/
+12
+);
+
+
+$("aEquity")
+.textContent=
+money(
+current.exitEquity
+);
+
+
+$("bIrr")
+.textContent=
+pct(other.irr*100);
+
+
+$("bCap")
+.textContent=
+pct(other.cap*100);
+
+
+$("bCash")
+.textContent=
+money(
+other.rows[0].cash/
+12
+);
+
+
+$("bEquity")
+.textContent=
+money(
+other.exitEquity
+);
+
+
+if(
+current.irr>
+other.irr
+){
+
+$("winner")
+.textContent=
+`Current Property leads on modeled IRR by ${
+pct(
+(
+current.irr-
+other.irr
+)*100
+)
+}.`;
+
+}
+
+else if(
+other.irr>
+current.irr
+){
+
+$("winner")
+.textContent=
+`Harbor View leads on modeled IRR by ${
+pct(
+(
+other.irr-
+current.irr
+)*100
+)
+}.`;
+
+}
+
+else{
+
+$("winner")
+.textContent=
+"Both properties have the same modeled IRR.";
+
+}
+
+}
+
+
+/* ================================
+   MAIN UPDATE
+================================ */
+
+function update(){
+
+const a=
+getInputs();
+
+
+const result=
+model(a);
+
+
+const s=
+calculateScore(
+result
+);
+
+
+/* METRICS */
+
+$("cap")
+.textContent=
+pct(
+result.cap*
+100
+);
+
+
+$("irr")
+.textContent=
+pct(
+result.irr*
+100
+);
+
+
+$("cashflow")
+.textContent=
+money(
+result.rows[0].cash/
+12
+);
+
+
+$("coc")
+.textContent=
+pct(
+result.coc*
+100
+);
+
+
+$("multiple")
+.textContent=
+result.multiple.toFixed(2)
++
+"×";
+
+
+$("equity")
+.textContent=
+money(
+result.exitEquity
+);
+
+
+$("dscr")
+.textContent=
+result.dscr.toFixed(2)
++
+"×";
+
+
+$("breakEven")
+.textContent=
+pct(
+result.breakEven*
+100
+);
+
+
+/* SCORE */
+
+$("scoreValue")
+.textContent=
+s;
+
+
+$("scoreRing")
+.style.background=
+`conic-gradient(
+#5c91ad 0 ${s}%,
+#dce7eb ${s}% 100%
+)`;
+
+
+let description;
+
+
+if(
+s>=75
+){
+
+description=[
+"Strong investment profile",
+"Cash flow, leverage and returns are currently working together."
+];
+
+}
+
+else if(
+s>=60
+){
+
+description=[
+"Promising, with trade-offs",
+"The deal has potential, but one or two assumptions deserve a stress test."
+];
+
+}
+
+else if(
+s>=45
+){
+
+description=[
+"Mixed investment profile",
+"The model is sensitive to assumptions. Stress-test the downside before deciding."
+];
+
+}
+
+else{
+
+description=[
+"High-risk profile",
+"The current assumptions do not provide enough return for the modeled risk."
+];
+
+}
+
+
+$("scoreLabel")
+.textContent=
+description[0];
+
+
+$("scoreReason")
+.textContent=
+description[1];
+
+
+$("yearCount")
+.textContent=
+a.hold+
+" YEARS";
+
+
+/* ASSUMPTIONS */
+
+$("keyAssumptions")
+.innerHTML=
+[
+
+[
+"Purchase price",
+money(a.price)
+],
+
+[
+"Down payment",
+pct(a.down*100)
+],
+
+[
+"Mortgage",
+pct(a.rate)
+],
+
+[
+"Vacancy",
+pct(a.vacancy*100)
+],
+
+[
+"Appreciation",
+pct(a.appreciation*100)
+]
+
+]
+.map(
+x=>
+`
+<div class="field">
+
+<span>
+${x[0]}
+</span>
+
+<b>
+${x[1]}
+</b>
+
+</div>
+`
+)
+.join("");
+
+
+/* MINI SCENARIOS */
+
+$("miniScenarios")
+.innerHTML=
+[
+"Conservative",
+"Base",
+"Optimistic"
+]
+.map(
+(type,index)=>{
+
+const r=
+type===
+"Base"
+?
+result
+:
+scenario(
+a,
+type
+);
+
+
+return`
+
+<div class="mini">
+
+<span>
+${
+[
+"DOWN",
+"BASE",
+"UPSIDE"
+][index]
+}
+</span>
+
+<b>
+${pct(
+r.irr*100
+)}
+</b>
+
+</div>
+
+`;
+
+}
+)
+.join("");
+
+
+/* MODEL NOTE */
+
+$("whyItWorks")
+.textContent=
+result.dscr>=1.2
+?
+`Debt coverage is healthy at ${
+result.dscr.toFixed(2)
+}×. NOI covers debt service with room to spare.`
+:
+`Debt coverage is ${
+result.dscr.toFixed(2)
+}×. The deal is sensitive to rent, vacancy and financing assumptions.`;
+
+
+/* RENDER */
+
+renderChart(
+result.rows
+);
+
+renderTable(
+result.rows
+);
+
+renderScenarios(
+a
+);
+
+renderSensitivity(
+a
+);
+
+renderAssumptions(
+a
+);
+
+renderComparison(
+a,
+result
+);
+
+updateTuner();
+
+}
+
+
+/* ================================
+   TUNER
+================================ */
+
+function updateTuner(){
+
+const value=
+Number(
+$("tuner").value
+);
+
+
+const a=
+getInputs();
+
+
+let type=
+"Base";
+
+
+if(
+value<34
+){
+
+type=
+"Conservative";
+
+}
+
+else if(
+value>66
+){
+
+type=
+"Optimistic";
+
+}
+
+
+const result=
+type===
+"Base"
+?
+model(a)
+:
+scenario(
+a,
+type
+);
+
+
+$("tunerLabel")
+.textContent=
+type.toUpperCase();
+
+
+$("tunerIrr")
+.textContent=
+pct(
+result.irr*
+100
+);
+
+
+if(
+type===
+"Conservative"
+){
+
+$("tunerText")
+.textContent=
+"Stress case: slower growth, higher vacancy and a softer exit.";
+
+}
+
+else if(
+type===
+"Optimistic"
+){
+
+$("tunerText")
+.textContent=
+"Upside case: stronger growth, lower vacancy and a tighter exit.";
+
+}
+
+else{
+
+$("tunerText")
+.textContent=
+"Drag this to stress-test the entire investment.";
+
+}
+
+}
+
+
+/* ================================
+   NAVIGATION
+================================ */
+
+function show(
+id
+){
+
+document
+.querySelectorAll(
+".view"
+)
+.forEach(
+view=>{
+
+view.classList.toggle(
+"hidden",
+view.id!==id
+);
+
+});
+
+
+document
+.querySelectorAll(
+"[data-view]"
+)
+.forEach(
+button=>{
+
+button.classList.toggle(
+"active",
+button.dataset.view===
+id
+);
+
+});
+
+
+document
+.querySelectorAll(
+".mode button"
+)
+.forEach(
+button=>{
+
+button.classList.toggle(
+"on",
+button.dataset.view===
+id
+);
+
+});
+
+
+window.scrollTo(
+{
+top:0,
+behavior:"smooth"
+}
+);
+
+}
+
+
+/* ================================
+   RESET
+================================ */
+
+function reset(){
+
+Object.entries(
+defaults
+)
+.forEach(
+([
+id,
+value
+])=>{
+
+if(
+$(id)
+){
+
+$(id).value=
+value;
+
+}
+
+});
+
+
+$("tuner").value=
+50;
+
+
+update();
+
+}
+
+
+/* ================================
+   MODAL
+================================ */
+
+function openModal(
+html
+){
+
+$("modalContent")
+.innerHTML=
+html;
+
+$("modal")
+.classList
+.remove(
+"hidden"
+);
+
+}
+
+
+/* ================================
+   INITIALIZE
+================================ */
+
+function initialize(){
+
+buildInputs();
+
+
+/*
+IMPORTANT:
+
+The listener is attached to DOCUMENT.
+
+The calculator inputs are generated
+dynamically by buildInputs().
+
+Therefore every generated number
+input is automatically live.
+*/
+
+document.addEventListener(
+"input",
+event=>{
+
+if(
+event.target.matches(
+'input[type="number"]'
+)
+){
+
+update();
+
+}
+
+});
+
+
+document.addEventListener(
+"change",
+event=>{
+
+if(
+event.target.matches(
+'input[type="number"]'
+)
+){
+
+update();
+
+}
+
+});
+
+
+/* NAVIGATION */
+
+document
+.querySelectorAll(
+"[data-view]"
+)
+.forEach(
+button=>{
+
+button.addEventListener(
+"click",
+()=>{
+
+show(
+button.dataset.view
+);
+
+}
+
+);
+
+});
+
+
+/* TUNER */
+
+$("tuner")
+.addEventListener(
+"input",
+updateTuner
+);
+
+
+/* RESET */
+
+$("reset")
+.addEventListener(
+"click",
+reset
+);
+
+
+/* CLOSE MODAL */
+
+$("closeModal")
+.addEventListener(
+"click",
+()=>{
+
+$("modal")
+.classList
+.add(
+"hidden"
+);
+
+});
+
+
+/* SCORE */
+
+$("whyScore")
+.addEventListener(
+"click",
+()=>{
+
+const r=
+model(
+getInputs()
+);
+
+const s=
+calculateScore(
+r
+);
+
+
+openModal(
+
+`
+<h2>
+Why ${s}/100?
+</h2>
+
+<p class="muted">
+
+The score combines modeled
+cap rate, IRR, debt coverage
+and break-even occupancy.
+
+It is a decision aid, not a
+credit or investment rating.
+
+</p>
+
+<ul>
+
+<li>
+Cap rate:
+<b>
+${pct(r.cap*100)}
+</b>
+</li>
+
+<li>
+IRR:
+<b>
+${pct(r.irr*100)}
+</b>
+</li>
+
+<li>
+DSCR:
+<b>
+${r.dscr.toFixed(2)}×
+</b>
+</li>
+
+<li>
+Break-even occupancy:
+<b>
+${pct(r.breakEven*100)}
+</b>
+</li>
+
+</ul>
+`
+
+);
+
+});
+
+
+/* FIRST CALCULATION */
+
+update();
+
+}
+
+
+/* ================================
+   START
+================================ */
+
+if(
+document.readyState===
+"loading"
+){
+
+document.addEventListener(
+"DOMContentLoaded",
+initialize
+);
+
+}
+
+else{
+
+initialize();
+
+}
+
+</script>
+
+</body>
+</html>
