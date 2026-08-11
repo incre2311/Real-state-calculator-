@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Glass Finance real estate investment underwriting and ROI analyzer.">
+<title>Real Estate Investment Analyzer · Glass Finance</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="scene">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <div class="particle p1"></div><div class="particle p2"></div><div class="particle p3"></div>
+  <div class="particle p4"></div><div class="particle p5"></div>
+
+  <div class="wrap">
+    <header class="nav glass">
+      <div class="brand"><i></i>REAL ESTATE LAB</div>
+      <div class="nav-right"><span id="saveStatus">● LIVE MODEL</span><button id="reset" class="ghost">Reset</button></div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">INVESTMENT UNDERWRITING · PRO</div>
+      <h1>A calmer way to<br>read the numbers.</h1>
+      <p>Model the deal, stress-test the assumptions, compare properties and understand what is actually driving the return.</p>
+    </section>
+
+    <div class="mobile-tabs">
+      <button class="active" data-section="property">⌂<span>Property</span></button>
+      <button data-section="finance">◉<span>Finance</span></button>
+      <button data-section="returns">↗<span>Returns</span></button>
+      <button data-section="scenarios">◇<span>Scenarios</span></button>
+      <button data-section="compare">⇄<span>Compare</span></button>
+    </div>
+
+    <div class="app-shell">
+      <aside class="glass rail">
+        <div class="rail-title">WORKSPACE</div>
+        <button class="navitem active" data-section="property"><b>⌂</b>Property</button>
+        <button class="navitem" data-section="finance"><b>◉</b>Financing</button>
+        <button class="navitem" data-section="returns"><b>↗</b>Returns</button>
+        <button class="navitem" data-section="scenarios"><b>◇</b>Scenarios</button>
+        <button class="navitem" data-section="compare"><b>⇄</b>Compare</button>
+        <div class="rail-title lower">MODEL</div>
+        <button class="navitem" data-section="yearly"><b>≡</b>Year-by-year</button>
+        <button class="navitem" data-section="assumptions"><b>⊙</b>Assumptions</button>
+        <div class="rail-hint">Tip<br><span>Use the Investment Tuner to stress the whole model in seconds.</span></div>
+      </aside>
+
+      <main class="glass center">
+        <div class="mode">
+          <button class="modebtn on" data-mode="decision">DECISION</button>
+          <button class="modebtn" data-mode="calculator">CALCULATOR</button>
+          <button class="modebtn" data-mode="scenario">SCENARIO</button>
+        </div>
+
+        <section class="view" data-view="decision">
+          <div class="hero-card">
+            <div class="eyebrow2">CURRENT PROPERTY</div>
+            <div class="deal-title" id="dealTitle">Maple Grove Residence</div>
+            <div class="deal-sub" id="dealSub">₹50L purchase · ₹45K monthly rent</div>
+            <div class="score-row">
+              <div class="score" id="scoreRing"><span id="scoreValue">78</span></div>
+              <div class="score-copy"><b id="scoreLabel">Strong investment profile</b><span id="scoreReason">Cash flow, leverage and returns are currently working together.</span></div>
+            </div>
+            <div class="metrics">
+              <div class="metric"><span>CAP RATE</span><strong id="cap">—</strong></div>
+              <div class="metric"><span>IRR</span><strong id="irr">—</strong></div>
+              <div class="metric"><span>CASH-ON-CASH</span><strong id="coc">—</strong></div>
+              <div class="metric"><span>MONTHLY CASH FLOW</span><strong id="cashflow">—</strong></div>
+              <div class="metric"><span>EQUITY MULTIPLE</span><strong id="multiple">—</strong></div>
+              <div class="metric"><span>EXIT EQUITY</span><strong id="equity">—</strong></div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-head"><span>PROPERTY VALUE & EQUITY</span><span id="chartLabel">● LIVE</span></div>
+            <div id="chart" class="chart"></div>
+          </div>
+
+          <div class="tuner">
+            <div class="controlhead"><span>INVESTMENT TUNER</span><b id="tunerLabel">BASE CASE</b></div>
+            <div class="slider"><input id="tuner" type="range" min="0" max="100" value="50" aria-label="Investment scenario tuner"><i class="knob"></i></div>
+            <div class="slider-labels"><span>CONSERVATIVE</span><span>BASE</span><span>OPTIMISTIC</span></div>
+            <div class="tuner-summary"><span id="tunerText">Drag this to stress-test the entire investment.</span><strong id="tunerIrr">—</strong></div>
+          </div>
+
+          <div class="quick-actions">
+            <button class="primary" id="whyScore">See why this scores 78 →</button>
+            <button id="openCompare">Compare another property</button>
+            <button id="askModel">Ask the model</button>
+          </div>
+
+          <div id="insightPanel" class="insight-panel hidden"></div>
+        </section>
+
+        <section class="view hidden" data-view="calculator">
+          <div class="section-heading"><div><span>TRADITIONAL MODEL</span><h2>All assumptions, one place.</h2></div><small>Changes update everything instantly.</small></div>
+          <div class="form-grid" id="calculatorFields"></div>
+        </section>
+
+        <section class="view hidden" data-view="scenario">
+          <div class="section-heading"><div><span>SCENARIO LAB</span><h2>See the range before you commit.</h2></div><small>Conservative · Base · Optimistic</small></div>
+          <div id="scenarioCards" class="scenario-grid"></div>
+          <div class="sensitivity glass-inset">
+            <div class="section-heading compact"><div><span>SENSITIVITY</span><h3>What moves the return most?</h3></div></div>
+            <div id="sensitivityRows"></div>
+          </div>
+        </section>
+
+        <section class="view hidden" data-view="compare">
+          <div class="section-heading"><div><span>DEAL COMPARISON</span><h2>Which property wins?</h2></div><button id="copyDeal" class="smallbtn">Copy current deal</button></div>
+          <div class="compare-grid">
+            <div class="property-card">
+              <div class="property-head"><span>PROPERTY A</span><button data-edit="A">Edit</button></div>
+              <h3 id="compareAName">Current Property</h3>
+              <div class="compare-metrics">
+                <div><span>IRR</span><b id="aIrr">—</b></div><div><span>CAP</span><b id="aCap">—</b></div><div><span>CASH FLOW</span><b id="aCash">—</b></div><div><span>EQUITY</span><b id="aEquity">—</b></div>
+              </div>
+            </div>
+            <div class="property-card">
+              <div class="property-head"><span>PROPERTY B</span><button data-edit="B">Edit</button></div>
+              <h3 id="compareBName">Harbor View</h3>
+              <div class="compare-metrics">
+                <div><span>IRR</span><b id="bIrr">—</b></div><div><span>CAP</span><b id="bCap">—</b></div><div><span>CASH FLOW</span><b id="bCash">—</b></div><div><span>EQUITY</span><b id="bEquity">—</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="winner" id="winner">Analyzing both deals…</div>
+        </section>
+
+        <section class="view hidden" data-view="yearly">
+          <div class="section-heading"><div><span>MODEL OUTPUT</span><h2>Year-by-year underwriting.</h2></div><small id="yearCount">—</small></div>
+          <div class="table-scroll"><table><thead><tr><th>Year</th><th>Property</th><th>Gross Rent</th><th>NOI</th><th>Debt Balance</th><th>Equity</th><th>Cash Flow</th></tr></thead><tbody id="rows"></tbody></table></div>
+          <div class="chart-card" style="margin-top:15px;">
+            <div class="chart-head"><span>ANNUAL CASH FLOW & NOI</span><span id="chart2Label">● LIVE</span></div>
+            <div id="chart2" class="chart"></div>
+          </div>
+        </section>
+
+        <section class="view hidden" data-view="assumptions">
+          <div class="section-heading"><div><span>ASSUMPTION MAP</span><h2>Everything driving the model.</h2></div></div>
+          <div class="assumption-map" id="assumptionMap"></div>
+        </section>
+      </main>
+
+      <aside class="glass right">
+        <div class="right-section">
+          <h3>KEY ASSUMPTIONS</h3>
+          <div id="keyAssumptions"></div>
+        </div>
+        <div class="right-section">
+          <h3>SCENARIO SNAPSHOT</h3>
+          <div class="mini-scenarios" id="miniScenarios"></div>
+        </div>
+        <div class="right-section">
+          <h3>WHY IT WORKS</h3>
+          <div class="insight" id="whyItWorks">Calculating…</div>
+        </div>
+        <div class="right-section">
+          <h3>QUICK ACTIONS</h3>
+          <button class="right-action" data-jump="calculator">Change assumptions <b>→</b></button>
+          <button class="right-action" data-jump="scenario">Stress-test vacancy <b>→</b></button>
+          <button class="right-action" data-jump="compare">Compare deal <b>→</b></button>
+        </div>
+      </aside>
+    </div>
+
+    <div class="bottom-metrics">
+      <div class="glass tile blue"><span>INITIAL CASH</span><strong id="initialCash">—</strong></div>
+      <div class="glass tile green"><span>DSCR</span><strong id="dscr">—</strong></div>
+      <div class="glass tile gold"><span>BREAK-EVEN OCCUPANCY</span><strong id="breakEven">—</strong></div>
+      <div class="glass tile blue"><span>LOAN-TO-VALUE</span><strong id="ltv">—</strong></div>
+    </div>
+
+    <div class="natural glass">
+      <div><div class="eyebrow2">NATURAL LANGUAGE MODE</div><h3>Ask the model.</h3></div>
+      <div class="question" id="questionText">“What happens to my IRR if rent grows only 1% a year?”</div>
+      <div class="answer" id="answerText">IRR will update against the slower rent-growth assumption.</div>
+      <div class="chips" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+        <button data-query="rent">Rent grows 1%</button>
+        <button data-query="vacancy">Vacancy rises to 10%</button>
+        <button data-query="rate">Mortgage rises 2%</button>
+        <button data-query="why">Why is this deal strong?</button>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input id="chatInput" type="text" placeholder="Ask the model… (e.g. 'vacancy 10%')" style="flex:1; border:1px solid #fff; background:#ffffff80; border-radius:18px; padding:8px 14px; font-size:8px; color:#314b58; outline:none;">
+        <button id="chatSend" style="border:1px solid #fff; background:#ffffff80; border-radius:18px; padding:8px 14px; font-size:8px; color:#314b58; cursor:pointer;">Ask</button>
+      </div>
+    </div>
+
+    <div class="note">EDUCATIONAL MODEL · Simplified underwriting. Validate assumptions, taxes and local transaction rules before investing.</div>
+  </div>
+</div>
+
+<div id="modal" class="modal hidden"><div class="modal-backdrop"></div><div class="modal-card glass"><button id="closeModal" class="close">×</button><div id="modalContent"></div></div></div>
+<script src="script.js"></script>
+</body>
+</html>
