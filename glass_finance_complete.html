@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Glass Finance real estate investment underwriting and ROI analyzer.">
+<title>Real Estate Investment Analyzer · Glass Finance</title>
+<style>
+*{box-sizing:border-box}
+:root{--ink:#263944;--muted:#73838c;--blue:#5c91ad;--green:#649b84;--gold:#a47b48;--line:#ffffffb8;--glass:#ffffff58;--soft:#e9f2f5}
+body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#e9f1f5}
+button,input{font:inherit}
+.scene{min-height:100vh;position:relative;overflow:hidden;background:radial-gradient(circle at 10% 12%,#d7edf5 0,transparent 28%),radial-gradient(circle at 91% 15%,#e0def3 0,transparent 28%),linear-gradient(135deg,#edf5f7,#e7eef1 55%,#f2eee8)}
+.orb{position:absolute;border-radius:50%;filter:blur(45px);opacity:.42;pointer-events:none}.o1{width:310px;height:310px;background:#9dd4e7;left:-100px;top:28%;animation:d1 18s ease-in-out infinite alternate}.o2{width:330px;height:330px;background:#c6b9eb;right:-110px;top:14%;animation:d2 22s ease-in-out infinite alternate}.o3{width:210px;height:210px;background:#a5d8c3;left:44%;bottom:-110px;animation:d3 20s ease-in-out infinite alternate}
+@keyframes d1{to{transform:translate(270px,-70px) scale(1.2)}}@keyframes d2{to{transform:translate(-230px,160px) scale(1.1)}}@keyframes d3{to{transform:translate(100px,-170px)}}
+.particle{position:absolute;width:5px;height:5px;border-radius:50%;background:#fff8;box-shadow:0 0 12px #fff;animation:float 14s linear infinite}.p1{left:12%;top:70%}.p2{left:25%;top:20%;animation-duration:17s}.p3{left:66%;top:76%;animation-duration:15s}.p4{left:82%;top:22%;animation-duration:19s}.p5{left:53%;top:45%;animation-duration:18s}
+@keyframes float{0%{transform:translateY(40px) translateX(0);opacity:0}15%{opacity:.8}85%{opacity:.55}100%{transform:translateY(-180px) translateX(35px);opacity:0}}
+.wrap{position:relative;z-index:2;max-width:1250px;margin:auto;padding:18px}.glass{background:rgba(255,255,255,.39);border:1px solid var(--line);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);box-shadow:0 22px 60px rgba(70,96,110,.12)}
+.nav{height:58px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:0 18px}.brand{font-size:10px;font-weight:800;letter-spacing:.18em}.brand i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:7px}.nav-right{display:flex;gap:9px;align-items:center}.nav-right span{font-size:9px;letter-spacing:.14em;color:var(--green)}.ghost,.smallbtn{border:1px solid #fff;background:#ffffff55;color:#5f7480;border-radius:10px;padding:7px 10px;font-size:9px;cursor:pointer}
+.hero{padding:62px 0 34px}.eyebrow,.eyebrow2{font-size:9px;letter-spacing:.22em;color:#668596;font-weight:800}.hero h1{font:400 clamp(50px,7vw,82px)/.9 Georgia,serif;letter-spacing:-.055em;margin:13px 0}.hero p{max-width:700px;color:var(--muted);line-height:1.65;font-size:15px}
+.app-shell{display:grid;grid-template-columns:205px minmax(0,1fr) 230px;gap:12px}.rail,.right,.center{border-radius:25px}.rail{padding:13px}.rail-title{font-size:8px;letter-spacing:.16em;color:#71838d;margin:5px 8px 12px}.rail-title.lower{margin-top:25px}.navitem{display:block;width:100%;border:0;text-align:left;padding:12px 10px;border-radius:13px;font-size:10px;color:#62747e;background:transparent;margin-bottom:4px;cursor:pointer}.navitem b{font-size:16px;margin-right:8px;font-weight:400;vertical-align:-2px}.navitem.active,.navitem:hover{background:#ffffffa8;color:#31566b;box-shadow:0 8px 20px #59788812}.rail-hint{margin:25px 8px 0;padding:12px;border-radius:14px;background:#ffffff45;border:1px solid #fff;font-size:8px;color:#597888;line-height:1.5}.rail-hint span{color:#7b8a92}
+.center{padding:14px;min-width:0}.mode{display:flex;gap:5px;background:#ffffff45;border:1px solid #fff;padding:4px;border-radius:14px;margin-bottom:12px}.modebtn{flex:1;border:0;background:transparent;border-radius:10px;padding:9px;font-size:8px;color:#71818b;cursor:pointer}.modebtn.on{background:#ffffffb8;color:#355e74;box-shadow:0 5px 15px #536f7e10}
+.hero-card{padding:18px;border-radius:21px;background:#ffffff62;border:1px solid #fff;position:relative;overflow:hidden}.hero-card:after{content:"";position:absolute;width:160px;height:160px;border-radius:50%;background:#fff6;filter:blur(35px);right:-70px;top:-70px;pointer-events:none}.deal-title{font:400 28px Georgia,serif;margin:7px 0}.deal-sub{font-size:10px;color:#788891}.score-row{display:flex;align-items:center;gap:15px;margin-top:16px}.score{width:74px;height:74px;border-radius:50%;background:conic-gradient(var(--blue) 0 78%,#dce7eb 78%);display:grid;place-items:center;position:relative;transition:.5s}.score:after{content:"";position:absolute;width:57px;height:57px;border-radius:50%;background:#e9f2f5}.score span{position:relative;z-index:2;font:400 20px Georgia,serif}.score-copy b{display:block;font-size:11px}.score-copy span{font-size:9px;color:#778892}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.metric{padding:12px;border-radius:15px;background:#ffffff55;border:1px solid #fff;transition:.3s}.metric:hover{transform:translateY(-2px);background:#ffffff78}.metric span{font-size:7px;letter-spacing:.12em;color:#73838c}.metric strong{display:block;font:400 21px Georgia,serif;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chart-card{margin-top:9px;border-radius:18px;background:#ffffff48;border:1px solid #fff;padding:10px}.chart-head{display:flex;justify-content:space-between;padding:3px 7px 7px;font-size:8px;letter-spacing:.12em;color:#72848d}.chart-head span:last-child{color:var(--green)}.chart{height:205px}.chart svg{width:100%;height:100%}.gridline{stroke:#66818e20}.path,.eq{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 4.5s ease-out infinite alternate}.path{stroke:var(--blue);stroke-width:4;filter:drop-shadow(0 3px 7px #5c91ad55)}.eq{stroke:var(--green);stroke-width:3;animation-delay:.45s}@keyframes draw{to{stroke-dashoffset:0}}
+.tuner{margin-top:10px;padding:14px;border-radius:16px;background:#ffffff55;border:1px solid #fff}.controlhead{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.12em;color:#71818a}.controlhead b{color:#355e74}.slider{height:6px;border-radius:6px;background:linear-gradient(90deg,#8aa9ba 0 50%,#dce6ea 50%);margin:15px 7px;position:relative}.slider input{position:absolute;inset:-10px 0;width:100%;opacity:0;cursor:pointer}.knob{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:21px;height:21px;border-radius:50%;background:#fff;border:3px solid var(--blue);box-shadow:0 5px 13px #4f788a44;pointer-events:none}.slider-labels{display:flex;justify-content:space-between;font-size:7px;color:#7b8991}.tuner-summary{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:10px;font-size:9px;color:#778892}.tuner-summary strong{font:400 20px Georgia,serif;color:#365b6e}.quick-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:10px}.quick-actions button{border:1px solid #fff;background:#ffffff5c;border-radius:12px;padding:10px;color:#5d707b;font-size:8px;cursor:pointer}.quick-actions .primary{background:#5a859c;color:white}
+.right{padding:14px}.right-section{padding:10px 0;border-bottom:1px solid #fff7}.right-section:last-child{border:0}.right h3{font-size:8px;letter-spacing:.15em;color:#72848d;margin:0 0 9px}.field{display:flex;justify-content:space-between;align-items:center;font-size:9px;color:#687983;margin:7px 0}.field b{font-weight:500;color:#3f5663}.insight{padding:12px;border-radius:14px;background:#e5f1ec9e;border:1px solid #fff;color:#4c7565;font-size:9px;line-height:1.5}.right-action{display:flex;justify-content:space-between;width:100%;border:0;background:transparent;color:#5f7580;font-size:9px;padding:8px 0;cursor:pointer}.right-action b{font-weight:500}
+.bottom-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.tile{padding:14px;border-radius:18px}.tile span{font-size:8px;color:#74858e}.tile strong{display:block;font:400 22px Georgia,serif;margin-top:6px}.tile.blue{background:#dcebf1b8}.tile.green{background:#dcece5b8}.tile.gold{background:#eee6d5b8}
+.natural{margin-top:12px;border-radius:20px;padding:16px;display:grid;grid-template-columns:1fr 1.6fr;gap:10px;align-items:center}.natural h3{font:400 23px Georgia,serif;margin:5px 0}.question,.answer{padding:11px 13px;border-radius:14px;font-size:9px;line-height:1.5}.question{background:#ffffff5d;border:1px solid #fff}.answer{background:#dcecf1b8;border:1px solid #fff}.chips{grid-column:1/-1}.chips button{border:1px solid #fff;background:#ffffff5d;color:#5d707b;border-radius:18px;padding:8px 10px;font-size:8px;margin:2px;cursor:pointer}
+.section-heading{display:flex;justify-content:space-between;align-items:end;margin:4px 4px 14px}.section-heading>div>span{font-size:8px;letter-spacing:.16em;color:#71838d}.section-heading h2{font:400 29px Georgia,serif;margin:5px 0 0}.section-heading h3{font:400 22px Georgia,serif;margin:5px 0 0}.section-heading small{font-size:8px;color:#788992}.section-heading.compact{margin-bottom:8px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-section{padding:15px;border-radius:17px;background:#ffffff55;border:1px solid #fff}.form-section h3{font-size:8px;letter-spacing:.15em;color:#6d8290;margin:0 0 12px}.input-row{margin-bottom:9px}.input-row label{display:block;font-size:8px;color:#6d7f89;margin-bottom:5px}.input-row input{width:100%;border:1px solid #fff;background:#ffffff80;color:#314b58;border-radius:10px;padding:9px;outline:none}.input-row input:focus{background:#fff;border-color:#9db8c5}
+.scenario-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.scenario-card{padding:16px;border-radius:19px;background:#ffffff58;border:1px solid #fff}.scenario-card h3{font:400 23px Georgia,serif;margin:0 0 4px}.scenario-card .big{font:400 31px Georgia,serif;margin:10px 0 2px}.scenario-card small{font-size:8px;color:#74858e}.scenario-row{display:flex;justify-content:space-between;border-top:1px solid #fff9;padding:8px 0;font-size:8px;color:#71818b}.scenario-row b{color:#3d5562}.glass-inset{margin-top:10px;padding:14px;border-radius:19px;background:#ffffff38;border:1px solid #fff}.sensitivity-row{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;margin:9px 0;font-size:8px;color:#687a84}.bar{height:7px;border-radius:7px;background:#dbe6ea;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue);border-radius:7px}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.property-card{padding:17px;border-radius:20px;background:#ffffff55;border:1px solid #fff}.property-head{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.13em;color:#71838d}.property-head button{border:0;background:transparent;color:#557b8f;font-size:8px}.property-card h3{font:400 25px Georgia,serif;margin:9px 0 15px}.compare-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.compare-metrics div{padding:11px;border-radius:13px;background:#ffffff55}.compare-metrics span{font-size:7px;color:#74858e}.compare-metrics b{display:block;font:400 20px Georgia,serif;margin-top:4px}.winner{margin-top:10px;padding:13px;border-radius:15px;background:#dcece5b8;color:#4d7565;font-size:9px}
+.table-scroll{overflow:auto;border:1px solid #fff;border-radius:14px;background:#ffffff45}table{width:100%;border-collapse:collapse;min-width:680px;font-size:8px}th,td{padding:11px 8px;border-bottom:1px solid #fff9;text-align:right}th:first-child,td:first-child{text-align:left}th{color:#6f818b;background:#ffffff35;font-weight:500}td{color:#405762}tr:last-child td{border-bottom:0}
+.assumption-map{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.assump{padding:13px;border-radius:16px;background:#ffffff55;border:1px solid #fff}.assump h3{font-size:8px;letter-spacing:.13em;color:#71838d;margin:0 0 10px}.assump-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #fff8;font-size:8px}.assump-row:last-child{border:0}
+.mini-scenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.mini{padding:8px 5px;border-radius:10px;background:#ffffff55;text-align:center}.mini span{display:block;font-size:6px;color:#74858e}.mini b{font:400 16px Georgia,serif}.note{text-align:center;color:#7a8991;font-size:8px;letter-spacing:.06em;margin:15px}.hidden{display:none!important}
+.mobile-tabs{display:none}.modal{position:fixed;inset:0;z-index:50}.modal-backdrop{position:absolute;inset:0;background:#31495555;backdrop-filter:blur(8px)}.modal-card{position:relative;max-width:560px;margin:12vh auto;padding:24px;border-radius:24px}.close{position:absolute;right:14px;top:12px;border:0;background:#ffffff66;border-radius:50%;width:28px;height:28px;color:#55717f;cursor:pointer}.modal-card h2{font:400 30px Georgia,serif;margin:0 0 9px}.modal-card p{font-size:10px;color:#6f818b;line-height:1.7}.modal-card ul{font-size:10px;color:#536b77;line-height:1.9}
+@media(max-width:1050px){.app-shell{grid-template-columns:180px minmax(0,1fr)}.right{display:none}.bottom-metrics{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:760px){.wrap{padding:12px}.hero{padding:45px 0 27px}.app-shell{display:block}.rail{display:none}.mobile-tabs{display:flex;gap:5px;margin-bottom:9px;overflow:auto}.mobile-tabs button{flex:1;min-width:65px;border:1px solid #fff;background:#ffffff55;color:#647782;border-radius:12px;padding:8px 5px;font-size:14px}.mobile-tabs button span{display:block;font-size:7px;margin-top:3px}.mobile-tabs button.active{background:#ffffffb8;color:#355e74}.metrics{grid-template-columns:repeat(2,1fr)}.quick-actions{grid-template-columns:1fr}.bottom-metrics{grid-template-columns:1fr 1fr}.natural{grid-template-columns:1fr}.chips{grid-column:auto}.form-grid,.scenario-grid,.compare-grid,.assumption-map{grid-template-columns:1fr}.section-heading{display:block}.section-heading small{display:block;margin-top:5px}.chart{height:180px}}
+
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+  <div class="particle p1"></div><div class="particle p2"></div><div class="particle p3"></div>
+  <div class="particle p4"></div><div class="particle p5"></div>
+
+  <div class="wrap">
+    <header class="nav glass">
+      <div class="brand"><i></i>REAL ESTATE LAB</div>
+      <div class="nav-right"><span id="saveStatus">● LIVE MODEL</span><button id="reset" class="ghost">Reset</button></div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">INVESTMENT UNDERWRITING · PRO</div>
+      <h1>A calmer way to<br>read the numbers.</h1>
+      <p>Model the deal, stress-test the assumptions, compare properties and understand what is actually driving the return.</p>
+    </section>
+
+    <div class="mobile-tabs">
+      <button class="active" data-section="property">⌂<span>Property</span></button>
+      <button data-section="finance">◉<span>Finance</span></button>
+      <button data-section="returns">↗<span>Returns</span></button>
+      <button data-section="scenarios">◇<span>Scenarios</span></button>
+      <button data-section="compare">⇄<span>Compare</span></button>
+    </div>
+
+    <div class="app-shell">
+      <aside class="glass rail">
+        <div class="rail-title">WORKSPACE</div>
+        <button class="navitem active" data-section="property"><b>⌂</b>Property</button>
+        <button class="navitem" data-section="finance"><b>◉</b>Financing</button>
+        <button class="navitem" data-section="returns"><b>↗</b>Returns</button>
+        <button class="navitem" data-section="scenarios"><b>◇</b>Scenarios</button>
+        <button class="navitem" data-section="compare"><b>⇄</b>Compare</button>
+        <div class="rail-title lower">MODEL</div>
+        <button class="navitem" data-section="yearly"><b>≡</b>Year-by-year</button>
+        <button class="navitem" data-section="assumptions"><b>⊙</b>Assumptions</button>
+        <div class="rail-hint">Tip<br><span>Use the Investment Tuner to stress the whole model in seconds.</span></div>
+      </aside>
+
+      <main class="glass center">
+        <div class="mode">
+          <button class="modebtn on" data-mode="decision">DECISION</button>
+          <button class="modebtn" data-mode="calculator">CALCULATOR</button>
+          <button class="modebtn" data-mode="scenario">SCENARIO</button>
+        </div>
+
+        <section class="view" data-view="decision">
+          <div class="hero-card">
+            <div class="eyebrow2">CURRENT PROPERTY</div>
+            <div class="deal-title" id="dealTitle">Maple Grove Residence</div>
+            <div class="deal-sub" id="dealSub">₹50L purchase · ₹45K monthly rent</div>
+            <div class="score-row">
+              <div class="score" id="scoreRing"><span id="scoreValue">78</span></div>
+              <div class="score-copy"><b id="scoreLabel">Strong investment profile</b><span id="scoreReason">Cash flow, leverage and returns are currently working together.</span></div>
+            </div>
+            <div class="metrics">
+              <div class="metric"><span>CAP RATE</span><strong id="cap">—</strong></div>
+              <div class="metric"><span>IRR</span><strong id="irr">—</strong></div>
+              <div class="metric"><span>CASH-ON-CASH</span><strong id="coc">—</strong></div>
+              <div class="metric"><span>MONTHLY CASH FLOW</span><strong id="cashflow">—</strong></div>
+              <div class="metric"><span>EQUITY MULTIPLE</span><strong id="multiple">—</strong></div>
+              <div class="metric"><span>EXIT EQUITY</span><strong id="equity">—</strong></div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-head"><span>PROPERTY VALUE & EQUITY</span><span id="chartLabel">● LIVE</span></div>
+            <div id="chart" class="chart"></div>
+          </div>
+
+          <div class="tuner">
+            <div class="controlhead"><span>INVESTMENT TUNER</span><b id="tunerLabel">BASE CASE</b></div>
+            <div class="slider"><input id="tuner" type="range" min="0" max="100" value="50" aria-label="Investment scenario tuner"><i class="knob"></i></div>
+            <div class="slider-labels"><span>CONSERVATIVE</span><span>BASE</span><span>OPTIMISTIC</span></div>
+            <div class="tuner-summary"><span id="tunerText">Drag this to stress-test the entire investment.</span><strong id="tunerIrr">—</strong></div>
+          </div>
+
+          <div class="quick-actions">
+            <button class="primary" id="whyScore">See why this scores 78 →</button>
+            <button id="openCompare">Compare another property</button>
+            <button id="askModel">Ask the model</button>
+          </div>
+
+          <div id="insightPanel" class="insight-panel hidden"></div>
+        </section>
+
+        <section class="view hidden" data-view="calculator">
+          <div class="section-heading"><div><span>TRADITIONAL MODEL</span><h2>All assumptions, one place.</h2></div><small>Changes update everything instantly.</small></div>
+          <div class="form-grid" id="calculatorFields"></div>
+        </section>
+
+        <section class="view hidden" data-view="scenario">
+          <div class="section-heading"><div><span>SCENARIO LAB</span><h2>See the range before you commit.</h2></div><small>Conservative · Base · Optimistic</small></div>
+          <div id="scenarioCards" class="scenario-grid"></div>
+          <div class="sensitivity glass-inset">
+            <div class="section-heading compact"><div><span>SENSITIVITY</span><h3>What moves the return most?</h3></div></div>
+            <div id="sensitivityRows"></div>
+          </div>
+        </section>
+
+        <section class="view hidden" data-view="compare">
+          <div class="section-heading"><div><span>DEAL COMPARISON</span><h2>Which property wins?</h2></div><button id="copyDeal" class="smallbtn">Copy current deal</button></div>
+          <div class="compare-grid">
+            <div class="property-card">
+              <div class="property-head"><span>PROPERTY A</span><button data-edit="A">Edit</button></div>
+              <h3 id="compareAName">Current Property</h3>
+              <div class="compare-metrics">
+                <div><span>IRR</span><b id="aIrr">—</b></div><div><span>CAP</span><b id="aCap">—</b></div><div><span>CASH FLOW</span><b id="aCash">—</b></div><div><span>EQUITY</span><b id="aEquity">—</b></div>
+              </div>
+            </div>
+            <div class="property-card">
+              <div class="property-head"><span>PROPERTY B</span><button data-edit="B">Edit</button></div>
+              <h3 id="compareBName">Harbor View</h3>
+              <div class="compare-metrics">
+                <div><span>IRR</span><b id="bIrr">—</b></div><div><span>CAP</span><b id="bCap">—</b></div><div><span>CASH FLOW</span><b id="bCash">—</b></div><div><span>EQUITY</span><b id="bEquity">—</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="winner" id="winner">Analyzing both deals…</div>
+        </section>
+
+        <section class="view hidden" data-view="yearly">
+          <div class="section-heading"><div><span>MODEL OUTPUT</span><h2>Year-by-year underwriting.</h2></div><small id="yearCount">—</small></div>
+          <div class="table-scroll"><table><thead><tr><th>Year</th><th>Property</th><th>Gross Rent</th><th>NOI</th><th>Debt Balance</th><th>Equity</th><th>Cash Flow</th></tr></thead><tbody id="rows"></tbody></table></div>
+        </section>
+
+        <section class="view hidden" data-view="assumptions">
+          <div class="section-heading"><div><span>ASSUMPTION MAP</span><h2>Everything driving the model.</h2></div></div>
+          <div class="assumption-map" id="assumptionMap"></div>
+        </section>
+      </main>
+
+      <aside class="glass right">
+        <div class="right-section">
+          <h3>KEY ASSUMPTIONS</h3>
+          <div id="keyAssumptions"></div>
+        </div>
+        <div class="right-section">
+          <h3>SCENARIO SNAPSHOT</h3>
+          <div class="mini-scenarios" id="miniScenarios"></div>
+        </div>
+        <div class="right-section">
+          <h3>WHY IT WORKS</h3>
+          <div class="insight" id="whyItWorks">Calculating…</div>
+        </div>
+        <div class="right-section">
+          <h3>QUICK ACTIONS</h3>
+          <button class="right-action" data-jump="calculator">Change assumptions <b>→</b></button>
+          <button class="right-action" data-jump="scenario">Stress-test vacancy <b>→</b></button>
+          <button class="right-action" data-jump="compare">Compare deal <b>→</b></button>
+        </div>
+      </aside>
+    </div>
+
+    <div class="bottom-metrics">
+      <div class="glass tile blue"><span>INITIAL CASH</span><strong id="initialCash">—</strong></div>
+      <div class="glass tile green"><span>DSCR</span><strong id="dscr">—</strong></div>
+      <div class="glass tile gold"><span>BREAK-EVEN OCCUPANCY</span><strong id="breakEven">—</strong></div>
+      <div class="glass tile blue"><span>LOAN-TO-VALUE</span><strong id="ltv">—</strong></div>
+    </div>
+
+    <div class="natural glass">
+      <div><div class="eyebrow2">NATURAL LANGUAGE MODE</div><h3>Ask the model.</h3></div>
+      <div class="question" id="questionText">“What happens to my IRR if rent grows only 1% a year?”</div>
+      <div class="answer" id="answerText">IRR will update against the slower rent-growth assumption.</div>
+      <div class="chips"><button data-query="rent">Rent grows 1%</button><button data-query="vacancy">Vacancy rises to 10%</button><button data-query="rate">Mortgage rises 2%</button><button data-query="why">Why is this deal strong?</button></div>
+    </div>
+
+    <div class="note">EDUCATIONAL MODEL · Simplified underwriting. Validate assumptions, taxes and local transaction rules before investing.</div>
+  </div>
+</div>
+
+<div id="modal" class="modal hidden"><div class="modal-backdrop"></div><div class="modal-card glass"><button id="closeModal" class="close">×</button><div id="modalContent"></div></div></div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const defaults = {
+  price: 5000000, down: 20, closing: 3, reno: 250000,
+  rate: 8.5, term: 20, points: 0,
+  rent: 45000, vacancy: 5,
+  tax: 60000, insurance: 24000, maint: 8,
+  management: 8, capex: 4, other: 12000,
+  appreciation: 4, rentgrowth: 3, expensegrowth: 3,
+  hold: 10, exitcap: 6, selling: 6
+};
+
+let compareB = {
+  name: "Harbor View",
+  price: 5600000, down: 25, closing: 3, reno: 300000,
+  rate: 8.2, term: 20, points: 0,
+  rent: 52000, vacancy: 5,
+  tax: 70000, insurance: 26000, maint: 8,
+  management: 8, capex: 4, other: 14000,
+  appreciation: 5, rentgrowth: 3.2, expensegrowth: 3,
+  hold: 10, exitcap: 6, selling: 6
+};
+
+function value(id) {
+  const el = $(id);
+  if (!el) return defaults[id] ?? 0;
+  const n = Number(el.value);
+  return Number.isFinite(n) ? Math.max(0, n) : 0;
+}
+
+function getInputs() {
+  return {
+    price: value("price"),
+    down: value("down") / 100,
+    closing: value("closing") / 100,
+    reno: value("reno"),
+    rate: value("rate"),
+    term: Math.max(1, value("term")),
+    points: value("points") / 100,
+    rent: value("rent"),
+    vacancy: value("vacancy") / 100,
+    tax: value("tax"),
+    insurance: value("insurance"),
+    maint: value("maint") / 100,
+    management: value("management") / 100,
+    capex: value("capex") / 100,
+    other: value("other"),
+    appreciation: value("appreciation") / 100,
+    rentgrowth: value("rentgrowth") / 100,
+    expensegrowth: value("expensegrowth") / 100,
+    hold: Math.max(1, Math.round(value("hold"))),
+    exitcap: value("exitcap") / 100,
+    selling: value("selling") / 100
+  };
+}
+
+function money(n) {
+  return "₹" + Math.round(Number(n) || 0).toLocaleString("en-IN");
+}
+
+function pct(n) {
+  return (Number(n) || 0).toFixed(2) + "%";
+}
+
+function mortgagePayment(principal, annualRate, years) {
+  if (principal <= 0 || years <= 0) return 0;
+  const r = annualRate / 100 / 12;
+  const n = years * 12;
+  if (r === 0) return principal / n;
+  return principal * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1);
+}
+
+/* Reliable IRR via bisection. */
+function irr(cfs) {
+  const positive = cfs.some(x => x > 0);
+  const negative = cfs.some(x => x < 0);
+  if (!positive || !negative) return 0;
+
+  function npv(r) {
+    return cfs.reduce((sum, cf, i) => sum + cf / Math.pow(1+r, i), 0);
+  }
+
+  let low = -0.9999;
+  let high = 10;
+  let fLow = npv(low);
+  let fHigh = npv(high);
+
+  if (!Number.isFinite(fLow) || !Number.isFinite(fHigh)) return 0;
+
+  /* Find a bracket if the very wide endpoints do not bracket a root. */
+  if (fLow * fHigh > 0) {
+    let previousR = -0.99;
+    let previousF = npv(previousR);
+
+    for (let r = -0.98; r <= 10; r += 0.01) {
+      const f = npv(r);
+      if (Number.isFinite(f) && previousF * f <= 0) {
+        low = previousR;
+        high = r;
+        fLow = previousF;
+        fHigh = f;
+        break;
+      }
+      previousR = r;
+      previousF = f;
+    }
+  }
+
+  if (fLow * fHigh > 0) return 0;
+
+  for (let i = 0; i < 200; i++) {
+    const mid = (low + high) / 2;
+    const fMid = npv(mid);
+
+    if (Math.abs(fMid) < 1e-7) return mid;
+
+    if (fLow * fMid <= 0) {
+      high = mid;
+      fHigh = fMid;
+    } else {
+      low = mid;
+      fLow = fMid;
+    }
+  }
+
+  return (low + high) / 2;
+}
+
+function model(a) {
+  const loan = a.price * (1 - a.down);
+  const pointsCost = loan * a.points;
+  const initial = a.price*a.down + a.price*a.closing + a.reno + pointsCost;
+  const monthlyPayment = mortgagePayment(loan, a.rate, a.term);
+
+  let balance = loan;
+  let propertyValue = a.price;
+  let monthlyRent = a.rent;
+  let tax = a.tax;
+  let insurance = a.insurance;
+  let other = a.other;
+
+  const rows = [];
+  const cashFlows = [-initial];
+  let totalInterest = 0;
+
+  for (let year = 1; year <= a.hold; year++) {
+    propertyValue *= 1 + a.appreciation;
+    monthlyRent *= 1 + a.rentgrowth;
+
+    if (year > 1) {
+      tax *= 1 + a.expensegrowth;
+      insurance *= 1 + a.expensegrowth;
+      other *= 1 + a.expensegrowth;
+    }
+
+    const grossRent = monthlyRent * 12;
+    const collectedRent = grossRent * (1 - a.vacancy);
+    const maintenance = grossRent * a.maint;
+    const management = collectedRent * a.management;
+    const capex = grossRent * a.capex;
+
+    const operatingExpenses =
+      maintenance + management + capex + tax + insurance + other;
+
+    const noi = collectedRent - operatingExpenses;
+
+    let debtService = 0;
+    let interest = 0;
+
+    for (let month = 0; month < 12; month++) {
+      if (balance > 0) {
+        const monthlyInterest = balance * a.rate / 100 / 12;
+        const principal = Math.min(
+          balance,
+          Math.max(0, monthlyPayment - monthlyInterest)
+        );
+
+        balance = Math.max(0, balance - principal);
+        interest += monthlyInterest;
+        totalInterest += monthlyInterest;
+      }
+      debtService += monthlyPayment;
+    }
+
+    const cashFlow = noi - debtService;
+    const equity = propertyValue - balance;
+
+    rows.push({
+      year, propertyValue, grossRent, collectedRent, NOI: noi,
+      debtBalance: balance, equity, cashFlow, debtService, interest
+    });
+
+    cashFlows.push(cashFlow);
+  }
+
+  const last = rows[rows.length - 1];
+
+  const terminalValue =
+    a.exitcap > 0 ? last.NOI / a.exitcap : last.propertyValue;
+
+  const netSale = terminalValue * (1 - a.selling);
+  const exitEquity = netSale - last.debtBalance;
+
+  cashFlows[cashFlows.length - 1] += exitEquity;
+
+  const y1 = rows[0];
+
+  const totalPositive =
+    cashFlows.slice(1).reduce((s,x) => s + Math.max(0,x), 0);
+
+  const profit =
+    cashFlows.reduce((s,x) => s+x, 0);
+
+  const multiple =
+    initial > 0 ? totalPositive / initial : 0;
+
+  const investmentIRR = irr(cashFlows);
+  const cap = a.price > 0 ? y1.NOI / a.price : 0;
+  const coc = initial > 0 ? y1.cashFlow / initial : 0;
+  const dscr = y1.debtService > 0 ? y1.NOI / y1.debtService : 0;
+  const ltv = a.price > 0 ? loan / a.price : 0;
+  const debtYield = loan > 0 ? y1.NOI / loan : 0;
+
+  /*
+    Exact break-even occupancy.
+
+    O = [fixed costs / gross rent + maintenance + CapEx]
+        / [1 - management]
+
+    No 100% clamp. >100% means the deal cannot
+    break even through occupancy alone.
+  */
+  const fixedCosts =
+    y1.debtService + a.tax + a.insurance + a.other;
+
+  const breakEven =
+    y1.grossRent > 0
+      ? (
+          fixedCosts / y1.grossRent +
+          a.maint +
+          a.capex
+        ) / Math.max(0.000001, 1-a.management)
+      : 0;
+
+  return {
+    rows, initial, loan, totalInterest, exitEquity, profit,
+    irr: investmentIRR, multiple, cap, coc, dscr,
+    breakEven, debtYield, ltv
+  };
+}
+
+function score(m) {
+  let s = 50;
+  s += Math.max(-15, Math.min(15, (m.cap - 0.06) * 250));
+  s += Math.max(-15, Math.min(20, (m.irr - 0.08) * 120));
+  s += Math.max(-10, Math.min(10, (m.dscr - 1) * 15));
+  s += Math.max(-10, Math.min(10, (0.9 - m.breakEven) * 30));
+  return Math.max(0, Math.min(100, Math.round(s)));
+}
+
+function scenarioModel(a, type) {
+  const s = {...a};
+
+  if (type === "Conservative") {
+    s.appreciation = Math.max(0, s.appreciation - 0.02);
+    s.rentgrowth = Math.max(0, s.rentgrowth - 0.015);
+    s.vacancy = Math.min(0.95, s.vacancy + 0.03);
+    s.exitcap += 0.01;
+  }
+
+  if (type === "Optimistic") {
+    s.appreciation += 0.02;
+    s.rentgrowth += 0.015;
+    s.vacancy = Math.max(0, s.vacancy - 0.02);
+    s.exitcap = Math.max(0.01, s.exitcap - 0.01);
+  }
+
+  return model(s);
+}
+
+/* ---------- INPUT UI ---------- */
+
+function buildFields() {
+  const container = $("calculatorFields");
+  if (!container) return;
+
+  const groups = {
+    "ACQUISITION": [
+      ["price","Purchase price"],
+      ["down","Down payment %"],
+      ["closing","Closing costs %"],
+      ["reno","Renovation / upfront costs"]
+    ],
+    "FINANCING": [
+      ["rate","Mortgage rate %"],
+      ["term","Loan term (years)"],
+      ["points","Loan points %"]
+    ],
+    "RENT & OPERATIONS": [
+      ["rent","Monthly rent"],
+      ["vacancy","Vacancy %"],
+      ["tax","Property tax / year"],
+      ["insurance","Insurance / year"],
+      ["maint","Maintenance % of gross rent"],
+      ["management","Management % of collected rent"],
+      ["capex","CapEx reserve % of gross rent"],
+      ["other","Other expenses / year"]
+    ],
+    "GROWTH & EXIT": [
+      ["appreciation","Property appreciation % / year"],
+      ["rentgrowth","Rent growth % / year"],
+      ["expensegrowth","Expense growth % / year"],
+      ["hold","Hold period (years)"],
+      ["exitcap","Exit cap rate %"],
+      ["selling","Selling costs %"]
+    ]
+  };
+
+  container.innerHTML = Object.entries(groups).map(([group, fields]) => `
+    <section class="form-section">
+      <h3>${group}</h3>
+      ${fields.map(([id,label]) => `
+        <div class="input-row">
+          <label for="${id}">${label}</label>
+          <input id="${id}" type="number" value="${defaults[id]}" step="any" inputmode="decimal">
+        </div>
+      `).join("")}
+    </section>
+  `).join("");
+}
+
+/* ---------- CHART ---------- */
+
+function renderChart(rows) {
+  const chart = $("chart");
+  if (!chart || !rows.length) return;
+
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS,"svg");
+  svg.setAttribute("viewBox","0 0 900 260");
+  svg.setAttribute("preserveAspectRatio","none");
+
+  const W=900,H=260,L=60,R=20,T=20,B=30;
+  const PW=W-L-R, PH=H-T-B;
+
+  const max = Math.max(
+    ...rows.map(r => Math.max(r.propertyValue, Math.max(0,r.equity))),
+    1
+  );
+
+  const x = i => L + PW*i/Math.max(1,rows.length-1);
+  const y = v => T + PH*(1-v/max);
+
+  const el = (tag, attrs) => {
+    const e=document.createElementNS(NS,tag);
+    Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+    return e;
+  };
+
+  for(let i=0;i<4;i++){
+    const gy=T+PH*i/3;
+    svg.appendChild(el("line",{
+      x1:L,y1:gy,x2:W-R,y2:gy,class:"gridline"
+    }));
+  }
+
+  const propertyPoints=rows.map((r,i)=>`${x(i)},${y(r.propertyValue)}`).join(" ");
+  const equityPoints=rows.map((r,i)=>`${x(i)},${y(Math.max(0,r.equity))}`).join(" ");
+
+  svg.appendChild(el("polyline",{points:propertyPoints,class:"path"}));
+  svg.appendChild(el("polyline",{points:equityPoints,class:"eq"}));
+
+  rows.forEach((r,i)=>{
+    if(i===0 || i===rows.length-1 || i%5===0){
+      const t=el("text",{
+        x:x(i),y:H-8,"text-anchor":"middle",
+        fill:"#71838d","font-size":"9"
+      });
+      t.textContent="Y"+r.year;
+      svg.appendChild(t);
+    }
+  });
+
+  chart.innerHTML="";
+  chart.appendChild(svg);
+}
+
+/* ---------- YEAR TABLE ---------- */
+
+function renderTable(rows) {
+  const tbody=$("rows");
+  if(!tbody) return;
+
+  tbody.innerHTML=rows.map(r=>`
+    <tr>
+      <td>${r.year}</td>
+      <td>${money(r.propertyValue)}</td>
+      <td>${money(r.grossRent)}</td>
+      <td>${money(r.NOI)}</td>
+      <td>${money(r.debtBalance)}</td>
+      <td>${money(r.equity)}</td>
+      <td>${money(r.cashFlow)}</td>
+    </tr>
+  `).join("");
+}
+
+/* ---------- ASSUMPTION SIDEBAR ---------- */
+
+function renderRight(a,m) {
+  const box=$("keyAssumptions");
+  if(box){
+    box.innerHTML=[
+      ["Purchase price",money(a.price)],
+      ["Down payment",pct(a.down*100)],
+      ["Mortgage",pct(a.rate)],
+      ["Vacancy",pct(a.vacancy*100)],
+      ["Appreciation",pct(a.appreciation*100)]
+    ].map(x=>`
+      <div class="field"><span>${x[0]}</span><b>${x[1]}</b></div>
+    `).join("");
+  }
+
+  const mini=$("miniScenarios");
+  if(mini){
+    const list=[
+      scenarioModel(a,"Conservative"),
+      model(a),
+      scenarioModel(a,"Optimistic")
+    ];
+    mini.innerHTML=list.map((x,i)=>`
+      <div class="mini">
+        <span>${["DOWN","BASE","UPSIDE"][i]}</span>
+        <b>${pct(x.irr*100)}</b>
+      </div>
+    `).join("");
+  }
+
+  const why=$("whyItWorks");
+  if(why){
+    if(m.dscr>=1.2){
+      why.textContent=`Debt coverage is healthy at ${m.dscr.toFixed(2)}×.`;
+    }else{
+      why.textContent=`Debt coverage is ${m.dscr.toFixed(2)}×. Cash flow is sensitive to the operating assumptions.`;
+    }
+  }
+}
+
+/* ---------- SCENARIOS ---------- */
+
+function renderScenarios(a) {
+  const box=$("scenarioCards");
+  if(!box) return;
+
+  box.innerHTML=["Conservative","Base","Optimistic"].map(type=>{
+    const m=type==="Base"?model(a):scenarioModel(a,type);
+    const last=m.rows[m.rows.length-1];
+
+    return `
+      <div class="scenario-card">
+        <h3>${type}</h3>
+        <div class="big">${pct(m.irr*100)}</div>
+        <small>ANNUALIZED IRR</small>
+        <div class="scenario-row"><span>Exit equity</span><b>${money(m.exitEquity)}</b></div>
+        <div class="scenario-row"><span>Cash-on-cash</span><b>${pct(m.coc*100)}</b></div>
+        <div class="scenario-row"><span>Equity multiple</span><b>${m.multiple.toFixed(2)}×</b></div>
+        <div class="scenario-row"><span>Final property</span><b>${money(last.propertyValue)}</b></div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ---------- SENSITIVITY ---------- */
+
+function renderSensitivity(a) {
+  const box=$("sensitivityRows");
+  if(!box) return;
+
+  const base=model(a);
+  const tests=[
+    ["Property appreciation",model({...a,appreciation:a.appreciation+0.01}).irr-base.irr],
+    ["Rent growth",model({...a,rentgrowth:a.rentgrowth+0.01}).irr-base.irr],
+    ["Vacancy",base.irr-model({...a,vacancy:Math.min(.95,a.vacancy+.01)}).irr],
+    ["Mortgage rate",base.irr-model({...a,rate:a.rate+1}).irr]
+  ];
+
+  const max=Math.max(...tests.map(x=>Math.abs(x[1])),0.0001);
+
+  box.innerHTML=tests.map(([label,impact])=>{
+    const width=Math.min(100,Math.abs(impact)/max*100);
+    return `
+      <div class="sensitivity-row">
+        <span>${label}</span>
+        <div class="bar"><i style="width:${width}%"></i></div>
+        <b>${impact>=0?"+":""}${pct(impact*100)}</b>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ---------- ASSUMPTION MAP ---------- */
+
+function renderAssumptions(a) {
+  const box=$("assumptionMap");
+  if(!box) return;
+
+  const groups={
+    "ACQUISITION":[
+      ["Purchase price",money(a.price)],
+      ["Down payment",pct(a.down*100)],
+      ["Closing costs",pct(a.closing*100)],
+      ["Upfront costs",money(a.reno)]
+    ],
+    "FINANCING":[
+      ["Rate",pct(a.rate)],
+      ["Term",a.term+" years"],
+      ["Points",pct(a.points*100)]
+    ],
+    "OPERATIONS":[
+      ["Monthly rent",money(a.rent)],
+      ["Vacancy",pct(a.vacancy*100)],
+      ["Maintenance",pct(a.maint*100)],
+      ["Management",pct(a.management*100)],
+      ["CapEx",pct(a.capex*100)],
+      ["Other expenses",money(a.other)]
+    ],
+    "GROWTH & EXIT":[
+      ["Appreciation",pct(a.appreciation*100)],
+      ["Rent growth",pct(a.rentgrowth*100)],
+      ["Expense growth",pct(a.expensegrowth*100)],
+      ["Hold",a.hold+" years"],
+      ["Exit cap",pct(a.exitcap*100)],
+      ["Selling costs",pct(a.selling*100)]
+    ]
+  };
+
+  box.innerHTML=Object.entries(groups).map(([g,items])=>`
+    <div class="assump">
+      <h3>${g}</h3>
+      ${items.map(x=>`
+        <div class="assump-row"><span>${x[0]}</span><b>${x[1]}</b></div>
+      `).join("")}
+    </div>
+  `).join("");
+}
+
+/* ---------- COMPARISON ---------- */
+
+function renderCompare(a,m) {
+  const b=model(compareB);
+
+  if($("aIrr")) $("aIrr").textContent=pct(m.irr*100);
+  if($("aCap")) $("aCap").textContent=pct(m.cap*100);
+  if($("aCash")) $("aCash").textContent=money(m.rows[0].cashFlow/12);
+  if($("aEquity")) $("aEquity").textContent=money(m.exitEquity);
+
+  if($("bIrr")) $("bIrr").textContent=pct(b.irr*100);
+  if($("bCap")) $("bCap").textContent=pct(b.cap*100);
+  if($("bCash")) $("bCash").textContent=money(b.rows[0].cashFlow/12);
+  if($("bEquity")) $("bEquity").textContent=money(b.exitEquity);
+
+  if($("compareAName")) $("compareAName").textContent="Current Property";
+  if($("compareBName")) $("compareBName").textContent=compareB.name;
+
+  if($("winner")){
+    if(m.irr>b.irr){
+      $("winner").textContent=`Property A leads on modeled IRR by ${pct((m.irr-b.irr)*100)}.`;
+    }else if(b.irr>m.irr){
+      $("winner").textContent=`Property B leads on modeled IRR by ${pct((b.irr-m.irr)*100)}.`;
+    }else{
+      $("winner").textContent="Both properties have the same modeled IRR.";
+    }
+  }
+}
+
+/* ---------- MAIN UPDATE ---------- */
+
+function calculate() {
+  const a=getInputs();
+  const m=model(a);
+  const s=score(m);
+
+  if($("cap")) $("cap").textContent=pct(m.cap*100);
+  if($("irr")) $("irr").textContent=pct(m.irr*100);
+  if($("coc")) $("coc").textContent=pct(m.coc*100);
+  if($("cashflow")) $("cashflow").textContent=money(m.rows[0].cashFlow/12);
+  if($("multiple")) $("multiple").textContent=m.multiple.toFixed(2)+"×";
+  if($("equity")) $("equity").textContent=money(m.exitEquity);
+
+  if($("initialCash")) $("initialCash").textContent=money(m.initial);
+  if($("dscr")) $("dscr").textContent=m.dscr.toFixed(2)+"×";
+  if($("breakEven")) $("breakEven").textContent=pct(m.breakEven*100);
+  if($("ltv")) $("ltv").textContent=pct(m.ltv*100);
+
+  if($("scoreValue")) $("scoreValue").textContent=s;
+  if($("scoreLabel")){
+    $("scoreLabel").textContent=
+      s>=75 ? "Strong investment profile" :
+      s>=60 ? "Promising, with trade-offs" :
+      s>=45 ? "Mixed investment profile" :
+      "High-risk profile";
+  }
+  if($("scoreReason")){
+    $("scoreReason").textContent=
+      s>=75 ? "Cash flow, leverage and returns are currently working together." :
+      s>=60 ? "The deal has potential, but some assumptions deserve a stress test." :
+      s>=45 ? "The model is sensitive to assumptions. Stress-test the downside." :
+      "The current assumptions do not provide enough return for the modeled risk.";
+  }
+  if($("scoreRing")){
+    $("scoreRing").style.background=
+      `conic-gradient(var(--blue) 0 ${s}%,#dce7eb ${s}% 100%)`;
+  }
+
+  if($("dealSub")){
+    $("dealSub").textContent=
+      `${money(a.price)} purchase · ${money(a.rent)} monthly rent`;
+  }
+
+  if($("yearCount")) $("yearCount").textContent=`${a.hold} YEARS`;
+  if($("saveStatus")) $("saveStatus").textContent="● LIVE MODEL";
+
+  renderChart(m.rows);
+  renderTable(m.rows);
+  renderRight(a,m);
+  renderScenarios(a);
+  renderSensitivity(a);
+  renderAssumptions(a);
+  renderCompare(a,m);
+
+  updateTuner();
+}
+
+/* ---------- TUNER ---------- */
+
+function updateTuner() {
+  const tuner=$("tuner");
+  if(!tuner) return;
+
+  const v=Number(tuner.value)||50;
+  const a=getInputs();
+
+  const type=v<34?"Conservative":v>66?"Optimistic":"Base";
+  const m=type==="Base"?model(a):scenarioModel(a,type);
+
+  if($("tunerLabel")) $("tunerLabel").textContent=type.toUpperCase();
+  if($("tunerIrr")) $("tunerIrr").textContent=pct(m.irr*100);
+  if($("tunerText")){
+    $("tunerText").textContent=
+      type==="Conservative"
+        ?"Stress case: slower growth, higher vacancy and a softer exit."
+        :type==="Optimistic"
+        ?"Upside case: stronger growth, lower vacancy and a tighter exit."
+        :"Drag this to stress-test the entire investment.";
+  }
+
+  const slider=document.querySelector(".slider");
+  if(slider){
+    slider.style.background=
+      `linear-gradient(90deg,#8aa9ba 0 ${v}%,#dce6ea ${v}% 100%)`;
+  }
+
+  const knob=document.querySelector(".knob");
+  if(knob) knob.style.left=v+"%";
+}
+
+/* ---------- NAVIGATION ---------- */
+
+function showView(name) {
+  document.querySelectorAll(".view").forEach(view=>{
+    view.classList.toggle("hidden",view.dataset.view!==name);
+  });
+
+  document.querySelectorAll("[data-section]").forEach(el=>{
+    el.classList.toggle("active",el.dataset.section===name);
+  });
+
+  document.querySelectorAll(".modebtn").forEach(btn=>{
+    btn.classList.remove("on");
+  });
+
+  const mode =
+    name==="scenario" ? "scenario" :
+    ["calculator","yearly","assumptions"].includes(name) ? "calculator" :
+    "decision";
+
+  const active=document.querySelector(`.modebtn[data-mode="${mode}"]`);
+  if(active) active.classList.add("on");
+}
+
+/* ---------- MODEL QUESTIONS ---------- */
+
+function ask(type) {
+  const a=getInputs();
+  const base=model(a);
+  let title="";
+  let html="";
+
+  if(type==="rent"){
+    const x=model({...a,rentgrowth:.01});
+    title="Rent Growth Analysis";
+    html=`<p>At 1% annual rent growth, modeled IRR changes from <b>${pct(base.irr*100)}</b> to <b>${pct(x.irr*100)}</b>.</p>`;
+    $("questionText").textContent="“What happens to my IRR if rent grows only 1% a year?”";
+    $("answerText").textContent=`IRR changes to ${pct(x.irr*100)} under the slower growth assumption.`;
+  }
+
+  if(type==="vacancy"){
+    const x=model({...a,vacancy:.10});
+    title="Vacancy Stress Test";
+    html=`<p>At 10% vacancy, modeled IRR becomes <b>${pct(x.irr*100)}</b>.</p><p>Year-1 monthly cash flow becomes <b>${money(x.rows[0].cashFlow/12)}</b>.</p>`;
+    $("questionText").textContent="“What happens if vacancy rises to 10%?”";
+    $("answerText").textContent=`At 10% vacancy, modeled IRR is ${pct(x.irr*100)}.`;
+  }
+
+  if(type==="rate"){
+    const x=model({...a,rate:a.rate+2});
+    title="Mortgage Rate Stress Test";
+    html=`<p>At a mortgage rate of <b>${pct(a.rate+2)}</b>, modeled IRR becomes <b>${pct(x.irr*100)}</b>.</p>`;
+    $("questionText").textContent="“What happens if my mortgage rises by 2%?”";
+    $("answerText").textContent=`At ${pct(a.rate+2)}, modeled IRR is ${pct(x.irr*100)}.`;
+  }
+
+  if(type==="why"){
+    const s=score(base);
+    title="Investment Analysis";
+    html=`<p>Investment score: <b>${s}/100</b></p><ul>
+      <li>Cap rate: ${pct(base.cap*100)}</li>
+      <li>IRR: ${pct(base.irr*100)}</li>
+      <li>DSCR: ${base.dscr.toFixed(2)}×</li>
+      <li>Break-even occupancy: ${pct(base.breakEven*100)}</li>
+    </ul>`;
+  }
+
+  openModal(title,html);
+}
+
+function openModal(title,html){
+  const modal=$("modal");
+  const content=$("modalContent");
+  if(!modal||!content) return;
+  content.innerHTML=`<h2>${title}</h2>${html}`;
+  modal.classList.remove("hidden");
+}
+
+/* ---------- RESET ---------- */
+
+function resetCalculator(){
+  Object.entries(defaults).forEach(([id,v])=>{
+    const el=$(id);
+    if(el) el.value=v;
+  });
+
+  if($("tuner")) $("tuner").value=50;
+  calculate();
+}
+
+/* ---------- INITIALIZATION ---------- */
+
+function init(){
+  buildFields();
+
+  /*
+    Delegated listeners are used instead of binding to individual
+    inputs. This works with the dynamically generated fields and
+    with iPad Safari.
+  */
+  document.addEventListener("input",e=>{
+    if(e.target instanceof HTMLInputElement && e.target.type==="number"){
+      calculate();
+    }
+    if(e.target instanceof HTMLInputElement && e.target.type==="range"){
+      updateTuner();
+    }
+  });
+
+  document.addEventListener("change",e=>{
+    if(e.target instanceof HTMLInputElement && e.target.type==="number"){
+      calculate();
+    }
+  });
+
+  document.querySelectorAll("[data-section]").forEach(el=>{
+    el.addEventListener("click",()=>showView(el.dataset.section));
+  });
+
+  document.querySelectorAll(".modebtn").forEach(el=>{
+    el.addEventListener("click",()=>{
+      const mode=el.dataset.mode;
+      showView(
+        mode==="scenario" ? "scenario" :
+        mode==="calculator" ? "calculator" :
+        "decision"
+      );
+    });
+  });
+
+  document.querySelectorAll("[data-jump]").forEach(el=>{
+    el.addEventListener("click",()=>showView(el.dataset.jump));
+  });
+
+  document.querySelectorAll(".chips button").forEach(el=>{
+    el.addEventListener("click",()=>ask(el.dataset.query));
+  });
+
+  if($("whyScore")) $("whyScore").addEventListener("click",()=>ask("why"));
+  if($("askModel")) $("askModel").addEventListener("click",()=>ask("rent"));
+  if($("reset")) $("reset").addEventListener("click",resetCalculator);
+
+  if($("tuner")) $("tuner").addEventListener("input",updateTuner);
+
+  if($("openCompare")){
+    $("openCompare").addEventListener("click",()=>showView("compare"));
+  }
+
+  if($("copyDeal")){
+    $("copyDeal").addEventListener("click",()=>{
+      compareB={...getInputs(),name:"Copied Deal"};
+      calculate();
+      showView("compare");
+    });
+  }
+
+  if($("closeModal")){
+    $("closeModal").addEventListener("click",()=>{
+      $("modal")?.classList.add("hidden");
+    });
+  }
+
+  if($("modal")){
+    $("modal").addEventListener("click",e=>{
+      if(e.target.classList.contains("modal-backdrop")){
+        $("modal").classList.add("hidden");
+      }
+    });
+  }
+
+  calculate();
+}
+
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",init);
+}else{
+  init();
+}
+</script>
+
+</body>
+</html>
