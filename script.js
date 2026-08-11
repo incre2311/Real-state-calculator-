@@ -1,7 +1,7 @@
 /*
  * GLASS FINANCE
  * Real Estate Investment Analyzer
- * Complete client-side script with dynamic "what-if" parser
+ * Enhanced with smart "what-if" parser
  */
 
 "use strict";
@@ -2711,10 +2711,9 @@ function openModal(
 
 
 /* =========================================================
-   CHATBOT RULES (8 hardcoded + dynamic "what-if" parser)
+   CHATBOT RULES (hardcoded for chips)
    ========================================================= */
 
-// Hardcoded rules (for chips and quick commands)
 const CHAT_RULES = {
 
   rent: {
@@ -2875,7 +2874,7 @@ const CHAT_RULES = {
 
 
 /* =========================================================
-   DYNAMIC "WHAT-IF" PARSER
+   DYNAMIC "WHAT-IF" PARSER (Enhanced)
    ========================================================= */
 
 // Recognised variables and their mapping to input fields
@@ -2890,20 +2889,20 @@ const VARIABLE_MAP = {
 };
 
 function parseQuestion(text) {
-  // Normalise
   const lower = text.toLowerCase();
 
-  // Detect variable
+  // 1. Detect variable
   let variable = null;
-  for (const [key, patterns] of Object.entries({
-    rent: ['rent', 'rental'],
-    vacancy: ['vacancy', 'vacant'],
-    rate: ['rate', 'mortgage', 'interest'],
-    expenses: ['expenses', 'operating', 'costs'],
-    appreciation: ['appreciation', 'value growth'],
-    exitcap: ['exit cap', 'exit'],
-    reno: ['renovation', 'reno', 'budget']
-  })) {
+  const variablePatterns = {
+    rent: ['rent', 'rental', 'monthly rent'],
+    vacancy: ['vacancy', 'vacant', 'occupancy'],
+    rate: ['rate', 'mortgage', 'interest', 'loan rate'],
+    expenses: ['expenses', 'operating', 'costs', 'opex'],
+    appreciation: ['appreciation', 'value growth', 'property growth'],
+    exitcap: ['exit cap', 'exit cap rate', 'terminal cap'],
+    reno: ['renovation', 'reno', 'budget', 'upfront', 'renovation budget']
+  };
+  for (const [key, patterns] of Object.entries(variablePatterns)) {
     if (patterns.some(p => lower.includes(p))) {
       variable = key;
       break;
@@ -2911,23 +2910,29 @@ function parseQuestion(text) {
   }
   if (!variable) return null;
 
-  // Detect direction
-  let direction = 0; // 0 = unknown, 1 = increase, -1 = decrease
-  if (/increase|rise|up|grow|higher|raise/i.test(lower)) direction = 1;
-  else if (/decrease|fall|drop|down|lower|reduce|decline/i.test(lower)) direction = -1;
+  // 2. Detect direction
+  let direction = 0; // 0 = unknown (means "set to exact value")
+  if (/increase|rise|up|grow|higher|raise|add|plus/i.test(lower)) direction = 1;
+  else if (/decrease|fall|drop|down|lower|reduce|decline|minus|cut/i.test(lower)) direction = -1;
 
   // Special case: "double" => increase by 100%
-  if (/double|twice/i.test(lower)) {
+  if (/double|twice|2x/i.test(lower)) {
     return { variable, direction: 1, amount: 1.0, isPercentage: true };
   }
-  if (/half/i.test(lower)) {
+  if (/half|50%|0.5/i.test(lower)) {
     return { variable, direction: -1, amount: 0.5, isPercentage: true };
   }
 
-  // Extract number and unit
+  // 3. Extract number and unit
+  // Try to find a number with optional % or ₹ sign
   const numberMatch = lower.match(/(\d+\.?\d*)\s*(%|₹|lakh|crore)?/);
   if (!numberMatch) {
-    // If no number, maybe user wants a default? We'll return null to fall back to keyword matching.
+    // If no number, maybe the user said "increase rent" without specifying – we can assume a default of 5%
+    if (direction !== 0 && /rent|vacancy|rate|expenses|appreciation|exitcap|reno/.test(variable)) {
+      // Default change: 5% for percentages, 10% for flat? We'll use 5% for percentages and 10% for flat (rent/reno)
+      const defaultPercent = (variable === 'rent' || variable === 'reno') ? 0.05 : 0.05;
+      return { variable, direction, amount: defaultPercent, isPercentage: true };
+    }
     return null;
   }
 
@@ -2943,12 +2948,17 @@ function parseQuestion(text) {
     // We'll handle conversion later if needed
   }
 
-  // If no explicit direction, assume "increase" if positive number, but we need to infer from wording
-  // We already have direction from earlier; if direction is 0, we can set default based on common sense:
-  // - For vacancy, rate, exitcap, expenses: usually "increase" is bad, but user might say "decrease"
-  // We'll leave direction as 0 and let the caller decide to apply as is? Actually we can treat as "change" without direction.
-  // Better: if direction is 0, we assume the amount is the new target value (e.g., "rent to 40000").
-  // We'll handle both cases.
+  // If no explicit direction, assume "set to" (exact value)
+  // But if the number is accompanied by words like "to" or "at", we treat as absolute.
+  // We'll check if the phrase has "to" or "at" indicating a target.
+  const hasTarget = /to|at|equals|=/.test(lower);
+  if (hasTarget) {
+    direction = 0; // treat as absolute set
+  }
+
+  // If direction is still 0 and we have a percentage, it's ambiguous; we'll treat as "set to this exact value"
+  // For percentages, if they say "vacancy 8%", we set it to 8%.
+  // For flat, if they say "rent 50000", we set it to 50000.
 
   return { variable, direction, amount, isPercentage, unit };
 }
@@ -2977,7 +2987,6 @@ function applyChange(inputs, parsed) {
 
     case 'vacancy':
       if (isPercentage) {
-        // Change in percentage points? Usually user says "vacancy rises to 8%" – that's absolute.
         // If direction is 0, treat as absolute value; else apply percentage change.
         if (direction === 0) {
           newInputs.vacancy = amount; // amount is in decimal (e.g., 0.08)
@@ -3016,10 +3025,9 @@ function applyChange(inputs, parsed) {
       break;
 
     case 'expenses':
-      // We'll apply a uniform percentage change to all operating expenses
+      // Apply a uniform percentage change to all operating expenses
       if (isPercentage) {
         const change = direction * amount;
-        // Apply to maint, management, capex, tax, insurance, other
         newInputs.maint = Math.min(0.99, inputs.maint * (1 + change));
         newInputs.management = Math.min(0.99, inputs.management * (1 + change));
         newInputs.capex = Math.min(0.99, inputs.capex * (1 + change));
@@ -3115,7 +3123,7 @@ function handleWhatIfQuestion(text) {
       <li><strong>Base IRR:</strong> ${percent(base.irr * 100)}</li>
       <li><strong>Stressed IRR:</strong> ${percent(stressed.irr * 100)}</li>
       <li><strong>Change:</strong> ${percent((stressed.irr - base.irr) * 100)}</li>
-      <li><strong>Year-1 cash flow:</strong> ${money(stressed.rows[0]?.cashFlow / 12 || 0)}</li>
+      <li><strong>Year-1 monthly cash flow:</strong> ${money(stressed.rows[0]?.cashFlow / 12 || 0)}</li>
       <li><strong>Exit equity:</strong> ${money(stressed.exitEquity)}</li>
       <li><strong>Cap rate:</strong> ${percent(stressed.capRate * 100)}</li>
       <li><strong>DSCR:</strong> ${stressed.dscr.toFixed(2)}×</li>
@@ -3136,8 +3144,6 @@ function handleWhatIfQuestion(text) {
    ========================================================= */
 
 function askModel(ruleName) {
-  // If ruleName is not a key in CHAT_RULES, it might be a free-text query
-  // We'll handle that in the chat input handler.
   const rule = CHAT_RULES[ruleName];
   if (!rule) return;
 
@@ -3560,16 +3566,19 @@ function initialize() {
           askModel("reno");
         } else {
           openModal(
-            "Available commands",
-            `<p>I understand dynamic "what-if" questions like:<br>
-            <i>"What if rent drops 5%?"</i><br>
-            <i>"What if vacancy rises to 8%?"</i><br>
-            <i>"What if expenses increase 10%?"</i><br>
-            <i>"What if appreciation falls to 2%?"</i><br>
-            <i>"What if exit cap goes to 7%?"</i><br>
-            <i>"What if renovation budget doubles?"</i><br>
-            <i>"What if mortgage rate goes up 1.5%?"</i></p>
-            <p>Or use keywords: <b>rent, vacancy, rate, why, expenses, exitcap, appreciation, reno</b></p>`
+            "I didn't understand that",
+            `<p>I can answer dynamic "what-if" questions like:</p>
+            <ul>
+              <li><i>"What if rent drops 5%?"</i></li>
+              <li><i>"What if vacancy rises to 8%?"</i></li>
+              <li><i>"What if expenses increase 10%?"</i></li>
+              <li><i>"What if appreciation falls to 2%?"</i></li>
+              <li><i>"What if exit cap goes to 7%?"</i></li>
+              <li><i>"What if renovation budget doubles?"</i></li>
+              <li><i>"What if mortgage rate goes up 1.5%?"</i></li>
+            </ul>
+            <p>Or use one of these keywords: <b>rent, vacancy, rate, why, expenses, exitcap, appreciation, reno</b></p>
+            <p><small>Tip: include a number and a direction (increase/decrease) or a target value.</small></p>`
           );
         }
 
