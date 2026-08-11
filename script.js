@@ -1,7 +1,7 @@
 /*
  * GLASS FINANCE
  * Real Estate Investment Analyzer
- * Complete client-side script
+ * Complete client-side script with dynamic "what-if" parser
  */
 
 "use strict";
@@ -2711,182 +2711,163 @@ function openModal(
 
 
 /* =========================================================
-   CHATBOT RULES
+   CHATBOT RULES (8 hardcoded + dynamic "what-if" parser)
    ========================================================= */
 
+// Hardcoded rules (for chips and quick commands)
 const CHAT_RULES = {
 
   rent: {
-
-    title:
-      "Rent Growth Analysis",
-
-    question:
-      "“What happens to my IRR if rent grows only 1% a year?”",
-
+    title: "Rent Growth Analysis",
+    question: "“What happens to my IRR if rent grows only 1% a year?”",
     run(inputs) {
-
-      return calculateModel({
-
-        ...inputs,
-
-        rentgrowth:
-          0.01
-      });
+      return calculateModel({ ...inputs, rentgrowth: 0.01 });
     },
-
     answer(base, stressed) {
-
       return `
         At 1% annual rent growth,
         modeled IRR changes from
-        <b>${percent(
-          base.irr * 100
-        )}</b>
+        <b>${percent(base.irr * 100)}</b>
         to
-        <b>${percent(
-          stressed.irr * 100
-        )}</b>.
+        <b>${percent(stressed.irr * 100)}</b>.
       `;
     }
   },
 
-
   vacancy: {
-
-    title:
-      "Vacancy Stress Test",
-
-    question:
-      "“What happens if vacancy rises to 10%?”",
-
+    title: "Vacancy Stress Test",
+    question: "“What happens if vacancy rises to 10%?”",
     run(inputs) {
-
-      return calculateModel({
-
-        ...inputs,
-
-        vacancy:
-          0.10
-      });
+      return calculateModel({ ...inputs, vacancy: 0.10 });
     },
-
     answer(base, stressed) {
-
       return `
         At 10% vacancy,
         modeled IRR becomes
-        <b>${percent(
-          stressed.irr * 100
-        )}</b>.
-
+        <b>${percent(stressed.irr * 100)}</b>.
         Year-1 monthly cash flow becomes
-        <b>${money(
-          stressed.rows[0].cashFlow /
-          12
-        )}</b>.
+        <b>${money(stressed.rows[0].cashFlow / 12)}</b>.
       `;
     }
   },
-
 
   rate: {
-
-    title:
-      "Mortgage Rate Stress Test",
-
-    question:
-      "“What happens if my mortgage rises by 2%?”",
-
+    title: "Mortgage Rate Stress Test",
+    question: "“What happens if my mortgage rises by 2%?”",
     run(inputs) {
-
-      return calculateModel({
-
-        ...inputs,
-
-        rate:
-          inputs.rate + 2
-      });
+      return calculateModel({ ...inputs, rate: inputs.rate + 2 });
     },
-
     answer(base, stressed, inputs) {
-
       return `
         At a mortgage rate of
-        <b>${percent(
-          inputs.rate + 2
-        )}</b>,
+        <b>${percent(inputs.rate + 2)}</b>,
         modeled IRR becomes
-        <b>${percent(
-          stressed.irr * 100
-        )}</b>.
+        <b>${percent(stressed.irr * 100)}</b>.
       `;
     }
   },
 
-
   why: {
-
-    title:
-      "Investment Analysis",
-
-    question:
-      "“Why is this deal strong?”",
-
+    title: "Investment Analysis",
+    question: "“Why is this deal strong?”",
     run(inputs) {
-
-      return calculateModel(
-        inputs
-      );
+      return calculateModel(inputs);
     },
-
     answer(base) {
-
-      const score =
-        investmentScore(
-          base
-        );
-
-
+      const score = investmentScore(base);
       return `
-
-        <p>
-          Investment score:
-          <b>${score}/100</b>
-        </p>
-
+        <p>Investment score: <b>${score}/100</b></p>
         <ul>
-
-          <li>
-            Cap rate:
-            ${percent(
-              base.capRate * 100
-            )}
-          </li>
-
-          <li>
-            IRR:
-            ${percent(
-              base.irr * 100
-            )}
-          </li>
-
-          <li>
-            DSCR:
-            ${base.dscr.toFixed(
-              2
-            )}×
-          </li>
-
-          <li>
-            Break-even occupancy:
-            ${percent(
-              base.breakEvenOccupancy *
-              100
-            )}
-          </li>
-
+          <li>Cap rate: ${percent(base.capRate * 100)}</li>
+          <li>IRR: ${percent(base.irr * 100)}</li>
+          <li>DSCR: ${base.dscr.toFixed(2)}×</li>
+          <li>Break-even occupancy: ${percent(base.breakEvenOccupancy * 100)}</li>
         </ul>
+      `;
+    }
+  },
+
+  expenses: {
+    title: "Expense Shock Test",
+    question: "“What if operating expenses increase by 10%?”",
+    run(inputs) {
+      const shocked = { ...inputs };
+      shocked.maint = Math.min(0.99, shocked.maint * 1.1);
+      shocked.management = Math.min(0.99, shocked.management * 1.1);
+      shocked.capex = Math.min(0.99, shocked.capex * 1.1);
+      shocked.tax *= 1.1;
+      shocked.insurance *= 1.1;
+      shocked.other *= 1.1;
+      return calculateModel(shocked);
+    },
+    answer(base, stressed) {
+      return `
+        With a 10% increase in operating expenses,
+        modeled IRR drops from
+        <b>${percent(base.irr * 100)}</b>
+        to
+        <b>${percent(stressed.irr * 100)}</b>.
+        Year-1 cash flow changes from
+        <b>${money(base.rows[0].cashFlow / 12)}</b>
+        to
+        <b>${money(stressed.rows[0].cashFlow / 12)}</b>.
+      `;
+    }
+  },
+
+  exitcap: {
+    title: "Exit Cap Expansion",
+    question: "“What if the exit cap rate rises to 7%?”",
+    run(inputs) {
+      return calculateModel({ ...inputs, exitcap: 0.07 });
+    },
+    answer(base, stressed) {
+      return `
+        With an exit cap rate of 7%,
+        modeled IRR changes from
+        <b>${percent(base.irr * 100)}</b>
+        to
+        <b>${percent(stressed.irr * 100)}</b>.
+        Exit equity becomes
+        <b>${money(stressed.exitEquity)}</b>.
+      `;
+    }
+  },
+
+  appreciation: {
+    title: "Slower Appreciation",
+    question: "“What if property appreciation drops to 1%?”",
+    run(inputs) {
+      return calculateModel({ ...inputs, appreciation: 0.01 });
+    },
+    answer(base, stressed) {
+      return `
+        At 1% annual appreciation,
+        modeled IRR changes from
+        <b>${percent(base.irr * 100)}</b>
+        to
+        <b>${percent(stressed.irr * 100)}</b>.
+        Final property value becomes
+        <b>${money(stressed.rows[stressed.rows.length - 1].propertyValue)}</b>.
+      `;
+    }
+  },
+
+  reno: {
+    title: "Renovation Overrun",
+    question: "“What if the renovation budget doubles?”",
+    run(inputs) {
+      return calculateModel({ ...inputs, reno: inputs.reno * 2 });
+    },
+    answer(base, stressed) {
+      return `
+        With a doubled renovation budget,
+        modeled IRR changes from
+        <b>${percent(base.irr * 100)}</b>
+        to
+        <b>${percent(stressed.irr * 100)}</b>.
+        Initial cash invested becomes
+        <b>${money(stressed.initialCash)}</b>.
       `;
     }
   }
@@ -2894,69 +2875,282 @@ const CHAT_RULES = {
 
 
 /* =========================================================
-   CHATBOT ACTION
+   DYNAMIC "WHAT-IF" PARSER
    ========================================================= */
 
-function askModel(
-  ruleName
-) {
+// Recognised variables and their mapping to input fields
+const VARIABLE_MAP = {
+  rent: { key: 'rent', type: 'flat', label: 'monthly rent' },
+  vacancy: { key: 'vacancy', type: 'percentage', label: 'vacancy rate' },
+  rate: { key: 'rate', type: 'percentage', label: 'mortgage rate' },
+  expenses: { key: 'expenses', type: 'percentage', label: 'operating expenses' },
+  appreciation: { key: 'appreciation', type: 'percentage', label: 'appreciation' },
+  exitcap: { key: 'exitcap', type: 'percentage', label: 'exit cap rate' },
+  reno: { key: 'reno', type: 'flat', label: 'renovation budget' }
+};
 
-  const rule =
-    CHAT_RULES[
-      ruleName
-    ];
+function parseQuestion(text) {
+  // Normalise
+  const lower = text.toLowerCase();
 
+  // Detect variable
+  let variable = null;
+  for (const [key, patterns] of Object.entries({
+    rent: ['rent', 'rental'],
+    vacancy: ['vacancy', 'vacant'],
+    rate: ['rate', 'mortgage', 'interest'],
+    expenses: ['expenses', 'operating', 'costs'],
+    appreciation: ['appreciation', 'value growth'],
+    exitcap: ['exit cap', 'exit'],
+    reno: ['renovation', 'reno', 'budget']
+  })) {
+    if (patterns.some(p => lower.includes(p))) {
+      variable = key;
+      break;
+    }
+  }
+  if (!variable) return null;
 
-  if (!rule) {
-    return;
+  // Detect direction
+  let direction = 0; // 0 = unknown, 1 = increase, -1 = decrease
+  if (/increase|rise|up|grow|higher|raise/i.test(lower)) direction = 1;
+  else if (/decrease|fall|drop|down|lower|reduce|decline/i.test(lower)) direction = -1;
+
+  // Special case: "double" => increase by 100%
+  if (/double|twice/i.test(lower)) {
+    return { variable, direction: 1, amount: 1.0, isPercentage: true };
+  }
+  if (/half/i.test(lower)) {
+    return { variable, direction: -1, amount: 0.5, isPercentage: true };
   }
 
-
-  const inputs =
-    getInputs();
-
-
-  const base =
-    calculateModel(
-      inputs
-    );
-
-
-  const stressed =
-    rule.run(
-      inputs
-    );
-
-
-  const answer =
-    rule.answer(
-      base,
-      stressed,
-      inputs
-    );
-
-
-  setText(
-    "questionText",
-    rule.question
-  );
-
-
-  const answerElement =
-    $("answerText");
-
-
-  if (answerElement) {
-
-    answerElement.innerHTML =
-      answer;
+  // Extract number and unit
+  const numberMatch = lower.match(/(\d+\.?\d*)\s*(%|₹|lakh|crore)?/);
+  if (!numberMatch) {
+    // If no number, maybe user wants a default? We'll return null to fall back to keyword matching.
+    return null;
   }
 
+  let amount = parseFloat(numberMatch[1]);
+  let unit = numberMatch[2] || '';
+  let isPercentage = false;
 
-  openModal(
-    rule.title,
-    `<div>${answer}</div>`
-  );
+  if (unit === '%') {
+    isPercentage = true;
+    amount = amount / 100; // convert to decimal
+  } else if (unit === '₹' || unit === 'lakh' || unit === 'crore') {
+    // For flat amounts, we keep as is (₹ is just a label)
+    // We'll handle conversion later if needed
+  }
+
+  // If no explicit direction, assume "increase" if positive number, but we need to infer from wording
+  // We already have direction from earlier; if direction is 0, we can set default based on common sense:
+  // - For vacancy, rate, exitcap, expenses: usually "increase" is bad, but user might say "decrease"
+  // We'll leave direction as 0 and let the caller decide to apply as is? Actually we can treat as "change" without direction.
+  // Better: if direction is 0, we assume the amount is the new target value (e.g., "rent to 40000").
+  // We'll handle both cases.
+
+  return { variable, direction, amount, isPercentage, unit };
+}
+
+function applyChange(inputs, parsed) {
+  const { variable, direction, amount, isPercentage } = parsed;
+  const newInputs = { ...inputs };
+
+  switch (variable) {
+    case 'rent':
+      if (isPercentage) {
+        // Apply percentage change to rent
+        const change = direction * amount;
+        newInputs.rent = inputs.rent * (1 + change);
+      } else {
+        // Absolute change (flat amount)
+        // If direction is 0, set exact value; else add/subtract
+        if (direction === 0) {
+          newInputs.rent = amount;
+        } else {
+          newInputs.rent = inputs.rent + (direction * amount);
+        }
+      }
+      newInputs.rent = Math.max(0, newInputs.rent);
+      break;
+
+    case 'vacancy':
+      if (isPercentage) {
+        // Change in percentage points? Usually user says "vacancy rises to 8%" – that's absolute.
+        // If direction is 0, treat as absolute value; else apply percentage change.
+        if (direction === 0) {
+          newInputs.vacancy = amount; // amount is in decimal (e.g., 0.08)
+        } else {
+          const change = direction * amount;
+          newInputs.vacancy = inputs.vacancy + change;
+        }
+      } else {
+        // assume percentage points if no %
+        if (direction === 0) {
+          newInputs.vacancy = amount / 100;
+        } else {
+          newInputs.vacancy = inputs.vacancy + (direction * amount / 100);
+        }
+      }
+      newInputs.vacancy = clamp(newInputs.vacancy, 0, 0.99);
+      break;
+
+    case 'rate':
+      if (isPercentage) {
+        if (direction === 0) {
+          newInputs.rate = amount * 100; // amount is decimal, convert to percentage points
+        } else {
+          const change = direction * amount * 100; // amount is decimal, multiply by 100 to get percentage points
+          newInputs.rate = inputs.rate + change;
+        }
+      } else {
+        // flat number (percentage points)
+        if (direction === 0) {
+          newInputs.rate = amount;
+        } else {
+          newInputs.rate = inputs.rate + (direction * amount);
+        }
+      }
+      newInputs.rate = Math.max(0, newInputs.rate);
+      break;
+
+    case 'expenses':
+      // We'll apply a uniform percentage change to all operating expenses
+      if (isPercentage) {
+        const change = direction * amount;
+        // Apply to maint, management, capex, tax, insurance, other
+        newInputs.maint = Math.min(0.99, inputs.maint * (1 + change));
+        newInputs.management = Math.min(0.99, inputs.management * (1 + change));
+        newInputs.capex = Math.min(0.99, inputs.capex * (1 + change));
+        newInputs.tax = Math.max(0, inputs.tax * (1 + change));
+        newInputs.insurance = Math.max(0, inputs.insurance * (1 + change));
+        newInputs.other = Math.max(0, inputs.other * (1 + change));
+      } else {
+        // absolute change? Probably not common; we'll ignore.
+      }
+      break;
+
+    case 'appreciation':
+      if (isPercentage) {
+        if (direction === 0) {
+          newInputs.appreciation = amount; // amount is decimal
+        } else {
+          const change = direction * amount;
+          newInputs.appreciation = inputs.appreciation + change;
+        }
+      } else {
+        if (direction === 0) {
+          newInputs.appreciation = amount / 100;
+        } else {
+          newInputs.appreciation = inputs.appreciation + (direction * amount / 100);
+        }
+      }
+      newInputs.appreciation = Math.max(0, newInputs.appreciation);
+      break;
+
+    case 'exitcap':
+      if (isPercentage) {
+        if (direction === 0) {
+          newInputs.exitcap = amount; // decimal
+        } else {
+          const change = direction * amount;
+          newInputs.exitcap = inputs.exitcap + change;
+        }
+      } else {
+        if (direction === 0) {
+          newInputs.exitcap = amount / 100;
+        } else {
+          newInputs.exitcap = inputs.exitcap + (direction * amount / 100);
+        }
+      }
+      newInputs.exitcap = Math.max(0.0001, newInputs.exitcap);
+      break;
+
+    case 'reno':
+      if (isPercentage) {
+        const change = direction * amount;
+        newInputs.reno = inputs.reno * (1 + change);
+      } else {
+        if (direction === 0) {
+          newInputs.reno = amount;
+        } else {
+          newInputs.reno = inputs.reno + (direction * amount);
+        }
+      }
+      newInputs.reno = Math.max(0, newInputs.reno);
+      break;
+
+    default:
+      return null;
+  }
+  return newInputs;
+}
+
+function handleWhatIfQuestion(text) {
+  const parsed = parseQuestion(text);
+  if (!parsed) return null;
+
+  const inputs = getInputs();
+  const newInputs = applyChange(inputs, parsed);
+  if (!newInputs) return null;
+
+  const base = calculateModel(inputs);
+  const stressed = calculateModel(newInputs);
+
+  // Build a human-readable description of the change
+  let desc = '';
+  const varName = VARIABLE_MAP[parsed.variable]?.label || parsed.variable;
+  if (parsed.direction === 0) {
+    desc = `set ${varName} to ${parsed.isPercentage ? percent(parsed.amount * 100) : money(parsed.amount)}`;
+  } else {
+    const dir = parsed.direction === 1 ? 'increase' : 'decrease';
+    const amountStr = parsed.isPercentage ? percent(parsed.amount * 100) : money(parsed.amount);
+    desc = `${dir} ${varName} by ${amountStr}`;
+  }
+
+  const resultHTML = `
+    <p><strong>What if:</strong> ${desc}</p>
+    <ul>
+      <li><strong>Base IRR:</strong> ${percent(base.irr * 100)}</li>
+      <li><strong>Stressed IRR:</strong> ${percent(stressed.irr * 100)}</li>
+      <li><strong>Change:</strong> ${percent((stressed.irr - base.irr) * 100)}</li>
+      <li><strong>Year-1 cash flow:</strong> ${money(stressed.rows[0]?.cashFlow / 12 || 0)}</li>
+      <li><strong>Exit equity:</strong> ${money(stressed.exitEquity)}</li>
+      <li><strong>Cap rate:</strong> ${percent(stressed.capRate * 100)}</li>
+      <li><strong>DSCR:</strong> ${stressed.dscr.toFixed(2)}×</li>
+    </ul>
+  `;
+
+  return {
+    title: `What if: ${desc}`,
+    question: `“${text}”`,
+    answer: resultHTML,
+    stressed // we might need it later
+  };
+}
+
+
+/* =========================================================
+   CHATBOT ACTION (updated to try dynamic parser first)
+   ========================================================= */
+
+function askModel(ruleName) {
+  // If ruleName is not a key in CHAT_RULES, it might be a free-text query
+  // We'll handle that in the chat input handler.
+  const rule = CHAT_RULES[ruleName];
+  if (!rule) return;
+
+  const inputs = getInputs();
+  const base = calculateModel(inputs);
+  const stressed = rule.run(inputs);
+  const answer = rule.answer(base, stressed, inputs);
+
+  setText("questionText", rule.question);
+  const answerElement = $("answerText");
+  if (answerElement) answerElement.innerHTML = answer;
+
+  openModal(rule.title, `<div>${answer}</div>`);
 }
 
 
@@ -3275,7 +3469,7 @@ function initialize() {
 
 
   /*
-   * Chat input (natural language)
+   * Chat input (natural language) - now with dynamic parser
    */
 
   const chatInput =
@@ -3300,8 +3494,7 @@ function initialize() {
 
         const text =
           chatInput.value
-            .trim()
-            .toLowerCase();
+            .trim();
 
 
         if (!text) {
@@ -3309,72 +3502,78 @@ function initialize() {
         }
 
 
+        // First, try dynamic "what-if" parser
+        const dynamicResult = handleWhatIfQuestion(text);
+        if (dynamicResult) {
+          setText("questionText", dynamicResult.question);
+          const answerElement = $("answerText");
+          if (answerElement) answerElement.innerHTML = dynamicResult.answer;
+          openModal(dynamicResult.title, `<div>${dynamicResult.answer}</div>`);
+          chatInput.value = "";
+          return;
+        }
+
+        // Fallback to keyword matching (for simple commands)
+        const lower = text.toLowerCase();
         if (
-          text.includes(
-            "rent"
-          ) ||
-          text.includes(
-            "growth"
-          )
+          lower.includes("rent") ||
+          lower.includes("growth")
         ) {
-
-          askModel(
-            "rent"
-          );
-
+          askModel("rent");
         } else if (
-          text.includes(
-            "vacancy"
-          )
+          lower.includes("vacancy")
         ) {
-
-          askModel(
-            "vacancy"
-          );
-
+          askModel("vacancy");
         } else if (
-          text.includes(
-            "rate"
-          ) ||
-          text.includes(
-            "mortgage"
-          ) ||
-          text.includes(
-            "interest"
-          )
+          lower.includes("rate") ||
+          lower.includes("mortgage") ||
+          lower.includes("interest")
         ) {
-
-          askModel(
-            "rate"
-          );
-
+          askModel("rate");
         } else if (
-          text.includes(
-            "why"
-          ) ||
-          text.includes(
-            "strong"
-          ) ||
-          text.includes(
-            "score"
-          )
+          lower.includes("why") ||
+          lower.includes("strong") ||
+          lower.includes("score")
         ) {
-
-          askModel(
-            "why"
-          );
-
+          askModel("why");
+        } else if (
+          lower.includes("expense") ||
+          lower.includes("operating") ||
+          lower.includes("cost")
+        ) {
+          askModel("expenses");
+        } else if (
+          lower.includes("exit") ||
+          lower.includes("cap rate")
+        ) {
+          askModel("exitcap");
+        } else if (
+          lower.includes("appreciation") ||
+          lower.includes("value")
+        ) {
+          askModel("appreciation");
+        } else if (
+          lower.includes("reno") ||
+          lower.includes("renovation") ||
+          lower.includes("budget")
+        ) {
+          askModel("reno");
         } else {
-
           openModal(
-            "Unknown command",
-            `<p>I understand: <b>rent</b>, <b>vacancy</b>, <b>rate</b>, or <b>why</b>.</p>`
+            "Available commands",
+            `<p>I understand dynamic "what-if" questions like:<br>
+            <i>"What if rent drops 5%?"</i><br>
+            <i>"What if vacancy rises to 8%?"</i><br>
+            <i>"What if expenses increase 10%?"</i><br>
+            <i>"What if appreciation falls to 2%?"</i><br>
+            <i>"What if exit cap goes to 7%?"</i><br>
+            <i>"What if renovation budget doubles?"</i><br>
+            <i>"What if mortgage rate goes up 1.5%?"</i></p>
+            <p>Or use keywords: <b>rent, vacancy, rate, why, expenses, exitcap, appreciation, reno</b></p>`
           );
         }
 
-
-        chatInput.value =
-          "";
+        chatInput.value = "";
       };
 
 
