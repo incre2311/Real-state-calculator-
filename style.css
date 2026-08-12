@@ -1,3 +1,18 @@
+html, body {
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+.scene {
+  min-height: 100vh;
+  overflow: hidden;
+}
+.wrap {
+  padding: 18px 18px 0 18px; /* reduce bottom padding */
+}
+.note {
+  margin-bottom: 10px; /* reduce margin */
+}
 *{box-sizing:border-box}
 :root{--ink:#263944;--muted:#73838c;--blue:#5c91ad;--green:#649b84;--gold:#a47b48;--line:#ffffffb8;--glass:#ffffff58;--soft:#e9f2f5}
 body{margin:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#e9f1f5}
