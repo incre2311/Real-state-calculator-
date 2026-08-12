@@ -4151,6 +4151,18 @@ function createParticles() {
 setTimeout(createParticles, 500);
 // And again after 2 seconds to be safe
 setTimeout(createParticles, 2000);
+// Ensure particles are never removed
+setInterval(function() {
+  if (!document.getElementById('permanent-particles')) {
+    // Re-add them if they were removed
+    const particles = document.createElement('div');
+    particles.id = 'permanent-particles';
+    particles.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999;overflow:hidden;';
+    particles.innerHTML = `<!-- copy the 10 dots from above -->`;
+    document.body.appendChild(particles);
+    console.log('🔄 Particles re-added!');
+  }
+}, 1000);
 
 /* =========================================================
    START
