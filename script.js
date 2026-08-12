@@ -2,6 +2,7 @@
  * GLASS FINANCE
  * Real Estate Investment Analyzer
  * Complete – with Y-axis labels, tuner re-render, header save/load, validation.
+ * FIXED: explicit stroke colors on chart lines.
  */
 
 "use strict";
@@ -1128,7 +1129,7 @@ function buildCalculatorFields() {
 
 
 /* =========================================================
-   GRAPHS (with Y-axis labels)
+   GRAPHS (with explicit stroke colors)
    ========================================================= */
 
 function renderChart(rows) {
@@ -1178,13 +1179,31 @@ function renderChart(rows) {
     svg.appendChild(label);
   }
 
-  // Property value
+  // Property value – explicit stroke colors
   const propertyPoints = rows.map((row, index) => `${x(index)},${y(row.propertyValue)}`).join(' ');
-  svg.appendChild(svgElement('polyline', { points: propertyPoints, class: 'path' }));
+  const path1 = svgElement('polyline', {
+    points: propertyPoints,
+    class: 'path',
+    stroke: '#5c91ad',      // blue
+    fill: 'none',
+    'stroke-width': '4',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round'
+  });
+  svg.appendChild(path1);
 
-  // Equity
+  // Equity – explicit stroke colors
   const equityPoints = rows.map((row, index) => `${x(index)},${y(Math.max(0, row.equity))}`).join(' ');
-  svg.appendChild(svgElement('polyline', { points: equityPoints, class: 'eq' }));
+  const path2 = svgElement('polyline', {
+    points: equityPoints,
+    class: 'eq',
+    stroke: '#649b84',      // green
+    fill: 'none',
+    'stroke-width': '3',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round'
+  });
+  svg.appendChild(path2);
 
   // X-axis year labels
   rows.forEach((row, index) => {
@@ -1229,7 +1248,7 @@ function renderChart2(rows) {
     return e;
   }
 
-  // Grid and Y-axis labels (for this chart, we show both positive and negative)
+  // Grid and Y-axis labels
   for (let i = 0; i <= 4; i++) {
     const ratio = i / 4;
     const value = -maxVal + ratio * 2 * maxVal;
@@ -1251,14 +1270,30 @@ function renderChart2(rows) {
   const zeroY = y(0);
   svg.appendChild(el('line', { x1: left, y1: zeroY, x2: W - right, y2: zeroY, stroke: '#66818e40', strokeWidth: 1 }));
 
-  // NOI path
+  // NOI path – explicit stroke
   const noiPoints = rows.map((r, i) => `${x(i)},${y(r.noi)}`).join(' ');
-  svg.appendChild(el('polyline', { points: noiPoints, class: 'path' }));
+  const path1 = el('polyline', {
+    points: noiPoints,
+    class: 'path',
+    stroke: '#5c91ad',      // blue
+    fill: 'none',
+    'stroke-width': '3',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round'
+  });
+  svg.appendChild(path1);
 
-  // Cash flow path (gold)
+  // Cash flow path – explicit stroke (gold)
   const cfPoints = rows.map((r, i) => `${x(i)},${y(r.cashFlow)}`).join(' ');
-  const cfPath = el('polyline', { points: cfPoints, class: 'eq' });
-  cfPath.setAttribute('stroke', 'var(--gold)');
+  const cfPath = el('polyline', {
+    points: cfPoints,
+    class: 'eq',
+    stroke: '#a47b48',      // gold – hardcoded to avoid CSS var issues
+    fill: 'none',
+    'stroke-width': '3',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round'
+  });
   svg.appendChild(cfPath);
 
   // X-axis year labels
@@ -2567,7 +2602,7 @@ function updateTuner() {
   }
 
 
-  // *** NEW: Re‑render the charts with the stressed result ***
+  // Re‑render the charts with the stressed result
   renderChart(result.rows);
   renderChart2(result.rows);
 }
