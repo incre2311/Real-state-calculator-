@@ -16,7 +16,16 @@
   <div class="wrap">
     <header class="nav glass">
       <div class="brand"><i></i>REAL ESTATE LAB</div>
-      <div class="nav-right"><span id="saveStatus">● LIVE MODEL</span><button id="reset" class="ghost">Reset</button></div>
+      <div class="nav-right">
+        <select id="currencySelect" style="background:#ffffff55; border:1px solid #fff; border-radius:8px; padding:4px 8px; font-size:9px; color:#5f7480;">
+          <option value="₹">₹ INR</option>
+          <option value="$">$ USD</option>
+          <option value="€">€ EUR</option>
+          <option value="£">£ GBP</option>
+        </select>
+        <span id="saveStatus">● LIVE MODEL</span>
+        <button id="reset" class="ghost">Reset</button>
+      </div>
     </header>
 
     <section class="hero">
@@ -64,12 +73,12 @@
               <div class="score-copy"><b id="scoreLabel">Strong investment profile</b><span id="scoreReason">Cash flow, leverage and returns are currently working together.</span></div>
             </div>
             <div class="metrics">
-              <div class="metric"><span>CAP RATE</span><strong id="cap">—</strong></div>
-              <div class="metric"><span>IRR</span><strong id="irr">—</strong></div>
-              <div class="metric"><span>CASH-ON-CASH</span><strong id="coc">—</strong></div>
-              <div class="metric"><span>MONTHLY CASH FLOW</span><strong id="cashflow">—</strong></div>
-              <div class="metric"><span>EQUITY MULTIPLE</span><strong id="multiple">—</strong></div>
-              <div class="metric"><span>EXIT EQUITY</span><strong id="equity">—</strong></div>
+              <div class="metric"><span title="Net Operating Income divided by purchase price">CAP RATE</span><strong id="cap">—</strong></div>
+              <div class="metric"><span title="Internal Rate of Return over the hold period">IRR</span><strong id="irr">—</strong></div>
+              <div class="metric"><span title="First-year cash flow divided by initial equity">CASH-ON-CASH</span><strong id="coc">—</strong></div>
+              <div class="metric"><span title="Average monthly cash flow in year 1">MONTHLY CASH FLOW</span><strong id="cashflow">—</strong></div>
+              <div class="metric"><span title="Total cash received divided by total cash invested">EQUITY MULTIPLE</span><strong id="multiple">—</strong></div>
+              <div class="metric"><span title="Equity after selling the property at exit">EXIT EQUITY</span><strong id="equity">—</strong></div>
             </div>
           </div>
 
@@ -162,15 +171,17 @@
           <button class="right-action" data-jump="calculator">Change assumptions <b>→</b></button>
           <button class="right-action" data-jump="scenario">Stress-test vacancy <b>→</b></button>
           <button class="right-action" data-jump="compare">Compare deal <b>→</b></button>
+          <button class="right-action" id="saveDeal">Save current deal <b>💾</b></button>
+          <button class="right-action" id="loadDeal">Load saved deal <b>📂</b></button>
         </div>
       </aside>
     </div>
 
     <div class="bottom-metrics">
-      <div class="glass tile blue"><span>INITIAL CASH</span><strong id="initialCash">—</strong></div>
-      <div class="glass tile green"><span>DSCR</span><strong id="dscr">—</strong></div>
-      <div class="glass tile gold"><span>BREAK-EVEN OCCUPANCY</span><strong id="breakEven">—</strong></div>
-      <div class="glass tile blue"><span>LOAN-TO-VALUE</span><strong id="ltv">—</strong></div>
+      <div class="glass tile blue"><span title="Total cash invested upfront">INITIAL CASH</span><strong id="initialCash">—</strong></div>
+      <div class="glass tile green"><span title="Debt Service Coverage Ratio (NOI / debt service)">DSCR</span><strong id="dscr">—</strong></div>
+      <div class="glass tile gold"><span title="Minimum occupancy needed to break even">BREAK-EVEN OCCUPANCY</span><strong id="breakEven">—</strong></div>
+      <div class="glass tile blue"><span title="Loan amount divided by purchase price">LOAN-TO-VALUE</span><strong id="ltv">—</strong></div>
     </div>
 
     <div class="natural glass">
@@ -189,7 +200,9 @@
       </div>
     </div>
 
-    <div class="note">EDUCATIONAL MODEL · Simplified underwriting. Validate assumptions, taxes and local transaction rules before investing.</div>
+    <div class="note" style="background:#ffffff40; border-radius:12px; padding:12px; margin-top:20px; border:1px solid #fff; text-align:center; font-size:9px; color:#5a6f7a;">
+      <strong>⚠️ Educational tool – not financial advice.</strong> Always verify assumptions, consult a professional, and perform your own due diligence before making any investment decisions.
+    </div>
   </div>
 </div>
 
