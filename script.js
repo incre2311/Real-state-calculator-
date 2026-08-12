@@ -4015,6 +4015,67 @@ function initialize() {
     "property"
   );
 }
+/* =========================================================
+   GUARANTEED ANIMATIONS – this ALWAYS works
+   ========================================================= */
+
+function addAnimations() {
+  // 1. Make cards lift on hover
+  document.querySelectorAll('.metric, .property-card').forEach(el => {
+    el.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-12px) scale(1.03)';
+      this.style.boxShadow = '0 20px 50px rgba(45,55,52,0.2)';
+      this.style.transition = 'all 0.3s ease';
+    });
+    el.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+      this.style.boxShadow = 'none';
+    });
+  });
+
+  // 2. Make buttons pop on hover
+  document.querySelectorAll('button:not(.navitem):not(.modebtn):not(.right-action):not(.close)').forEach(el => {
+    el.addEventListener('mouseenter', function() {
+      this.style.transform = 'scale(1.08)';
+      this.style.boxShadow = '0 6px 30px rgba(92,145,173,0.4)';
+      this.style.transition = 'all 0.2s ease';
+    });
+    el.addEventListener('mouseleave', function() {
+      this.style.transform = 'scale(1)';
+      this.style.boxShadow = 'none';
+    });
+  });
+
+  // 3. Fade in all glass cards on load
+  document.querySelectorAll('.glass, .hero, .natural, .bottom-metrics .tile').forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'all 0.8s ease';
+    setTimeout(() => {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, 100 + i * 100);
+  });
+
+  // 4. Score ring pulse on hover
+  const score = document.querySelector('.score');
+  if (score) {
+    score.addEventListener('mouseenter', function() {
+      this.style.transform = 'scale(1.1)';
+      this.style.boxShadow = '0 0 50px rgba(92,145,173,0.25)';
+      this.style.transition = 'all 0.3s ease';
+    });
+    score.addEventListener('mouseleave', function() {
+      this.style.transform = 'scale(1)';
+      this.style.boxShadow = 'none';
+    });
+  }
+
+  console.log('✅ Animations added!');
+}
+
+// Call this after the page loads
+setTimeout(addAnimations, 100);
 
 
 /* =========================================================
