@@ -135,3 +135,265 @@ button,input{font:inherit}
   70% { opacity: 0.4; }
   100% { transform: translateY(-100vh) scaleX(1.2); opacity: 0; }
 }
+/* ========================================================
+   MERGED ANIMATIONS (from animationpatterns.art)
+   ======================================================== */
+
+/* ---- 1. CARD HOVER DEPTH (for metrics & beats) ---- */
+.hover-depth-card {
+  transition: box-shadow .22s ease, transform .22s ease, border-color .22s ease;
+}
+.hover-depth-card:hover,
+.hover-depth-card:focus-visible {
+  box-shadow: 0 14px 32px 4px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  border-color: rgba(92, 145, 173, 0.48);
+}
+.hover-depth-card:focus-visible {
+  outline: 2px solid #5c91ad;
+  outline-offset: 4px;
+}
+
+/* ---- 2. FLIP CARD (for property cards) ---- */
+.flip-card {
+  perspective: 720px;
+  outline-offset: 6px;
+}
+.flip-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 600ms cubic-bezier(.45,0,.55,1);
+}
+.flip-card:hover .flip-card__inner,
+.flip-card:focus .flip-card__inner {
+  transform: rotateY(180deg);
+}
+.flip-card__face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: .35rem;
+  border-radius: 16px;
+  color: white;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0.01px);
+}
+.flip-card__face--back {
+  background: linear-gradient(135deg, #312e81, #0f172a);
+  transform: rotateY(180deg) translateZ(0.01px);
+}
+.flip-card__face span { opacity: .72; }
+
+/* ---- 3. GRID CELL OVERLAY PULSE (for status indicators) ---- */
+.activity-heatmap {
+  --today-color: #34d399;
+  --today-soft: rgba(52, 211, 153, 0.24);
+  --pulse-duration: 1.8s;
+  display: inline-grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #0f172a;
+  color: #e5edf8;
+}
+.activity-heatmap__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 18px);
+  gap: 5px;
+}
+.activity-heatmap__cell {
+  position: relative;
+  width: 18px;
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: #1f2937;
+}
+.activity-heatmap__cell[data-level="1"] { background: #064e3b; }
+.activity-heatmap__cell[data-level="2"] { background: #047857; }
+.activity-heatmap__cell[data-level="3"] { background: #10b981; }
+.activity-heatmap__cell[data-level="4"] { background: #86efac; }
+.activity-heatmap__cell--today { z-index: 1; }
+.activity-heatmap__cell--today::before,
+.activity-heatmap__cell--today::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.activity-heatmap__cell--today::before {
+  border: 2px solid var(--today-color);
+  animation: active-cell-ring var(--pulse-duration) ease-in-out infinite;
+}
+.activity-heatmap__cell--today::after {
+  inset: 2px;
+  background: var(--today-soft);
+  animation: active-cell-core var(--pulse-duration) ease-in-out infinite;
+}
+@keyframes active-cell-ring {
+  0%, 100% { opacity: .45; transform: scale(.94); box-shadow: none; }
+  50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 24px var(--today-soft); }
+}
+@keyframes active-cell-core {
+  0%, 100% { opacity: .35; transform: scale(1); }
+  50% { opacity: .78; transform: scale(1.14); }
+}
+
+/* ---- 4. RATING STAR FILL HOVER (for feedback/polls) ---- */
+.star-rating {
+  display: inline-flex;
+  flex-direction: row-reverse;
+  gap: .25rem;
+  margin: 0;
+  padding: .4rem;
+  border: 0;
+}
+.star-rating legend {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.star-rating input {
+  position: absolute;
+  opacity: 0;
+}
+.star-rating label {
+  color: rgba(148, 163, 184, .32);
+  cursor: pointer;
+  font-size: 2rem;
+  line-height: 1;
+  transition: color .12s ease, transform .12s ease;
+}
+.star-rating input:checked ~ label {
+  color: #fde047;
+}
+.star-rating:hover input ~ label {
+  color: rgba(148, 163, 184, .32);
+}
+.star-rating:hover label:hover,
+.star-rating:hover label:hover ~ label {
+  color: #fde047;
+  transform: scale(1.08);
+}
+.star-rating input:focus-visible + label {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+/* ---- 5. PARALLAX 3D STACK (for hero cards) ---- */
+.parallax-card {
+  --rx: 0deg;
+  --ry: 0deg;
+  perspective: 700px;
+  width: 100%;
+}
+.parallax-card__stack {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 160ms ease;
+  min-height: 260px;
+}
+.parallax-card__layer {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 1rem;
+  transform: translateZ(var(--z));
+  background: color-mix(in srgb, #67e8f9 18%, #0f172a);
+  border: 1px solid rgba(103, 232, 249, .38);
+}
+.parallax-card__layer .hero-card {
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.62);
+  border-radius: 1rem;
+  backdrop-filter: blur(4px);
+  padding: 32px 40px;
+  margin: 0;
+}
+
+/* ---- 6. ALLOCATION CHART (DONUT) ---- */
+.donut-chart {
+  --primary: 64;
+  --secondary: 23;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #67e8f9 calc(var(--primary) * 1%),
+    #a78bfa 0 calc((var(--primary) + var(--secondary)) * 1%),
+    rgba(148, 163, 184, 0.18) 0
+  );
+  animation: donutSweep 2.40s ease-out both;
+}
+@keyframes donutSweep {
+  0% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
+
+/* ---- 7. BUTTON SWEEP FILL ---- */
+.btn-sweep {
+  background: linear-gradient(to right, #5a859c 50%, rgba(255,255,255,0.6) 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  transition: background-position 0.4s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.btn-sweep:hover {
+  background-position: 0 0;
+  color: white;
+  border-color: #5a859c;
+}
+.btn-sweep.ghost {
+  background: linear-gradient(to right, #5a859c 50%, rgba(255,255,255,0.3) 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
+}
+.btn-sweep.ghost:hover {
+  color: white;
+  border-color: #5a859c;
+}
+
+/* ---- 8. TYPEWRITER (chat) ---- */
+.typewriter {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.typewriter.visible {
+  max-height: 200px;
+}
+
+/* ---- REDUCED MOTION FALLBACKS ---- */
+@media (prefers-reduced-motion: reduce) {
+  .hover-depth-card { transition-property: box-shadow, border-color; }
+  .hover-depth-card:hover,
+  .hover-depth-card:focus-visible { transform: none; }
+  .flip-card__inner { transition-duration: 1ms; }
+  .activity-heatmap__cell--today::before,
+  .activity-heatmap__cell--today::after { animation: none; opacity: 1; transform: none; }
+  .star-rating label { transition: none; transform: none; }
+  .star-rating:hover label:hover,
+  .star-rating:hover label:hover ~ label { transform: none; }
+  .parallax-card__stack { transform: none; transition: none; }
+  .donut-chart { animation: none; }
+  .btn-sweep { transition: none; }
+  .btn-sweep:hover { background-position: 100% 0; color: inherit; }
+  .typewriter { transition: none; }
+  .typewriter.visible { max-height: none; }
+  .scene { animation: none; }
+  .scene::before { animation: none; }
+  .orb { animation: none !important; }
+  .particle { animation: none !important; }
+  .flow-line { animation: none !important; }
+  .glass::after { animation: none !important; }
+  .path, .eq { animation: none !important; }
+}
