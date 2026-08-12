@@ -85,10 +85,10 @@ button,input{font:inherit}
 .chart-head span:last-child{color:var(--green)}
 .chart{height:205px}
 .chart svg{width:100%;height:100%}
-.gridline{stroke:#66818e20}
-.path,.eq{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 4.5s ease-out infinite alternate}
-.path{stroke:var(--blue);stroke-width:4;filter:drop-shadow(0 3px 7px #5c91ad55)}
-.eq{stroke:var(--green);stroke-width:3;animation-delay:.45s}@keyframes draw{to{stroke-dashoffset:0}}
+.gridline{stroke:#66818e20;stroke-width:1}
+.path{fill:none;stroke:#5c91ad;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 4.5s ease-out infinite alternate}
+.eq{fill:none;stroke:#649b84;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 4.5s ease-out infinite alternate;animation-delay:.45s}
+@keyframes draw{to{stroke-dashoffset:0}}
 .tuner{margin-top:10px;padding:14px;border-radius:16px;background:#ffffff55;border:1px solid #fff}
 .controlhead{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.12em;color:#71818a}
 .controlhead b{color:#355e74}
@@ -194,4 +194,6 @@ tr:last-child td{border-bottom:0}
   .flow-line { animation: none !important; }
   .glass::after { animation: none !important; }
   .path, .eq { animation: none !important; }
+  .path { stroke-dashoffset: 0 !important; }
+  .eq { stroke-dashoffset: 0 !important; }
 }
