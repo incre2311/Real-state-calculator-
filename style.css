@@ -197,3 +197,74 @@ tr:last-child td{border-bottom:0}
   .path { stroke-dashoffset: 0 !important; }
   .eq { stroke-dashoffset: 0 !important; }
 }
+
+/* ========================================================
+   VISIBLE ANIMATIONS (cards, buttons, fade-in)
+   ======================================================== */
+
+/* ---- Card hover lift ---- */
+.metric {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.metric:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(45, 55, 52, 0.2);
+}
+.property-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.property-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(45, 55, 52, 0.15);
+  border-color: #5c91ad;
+}
+
+/* ---- Button pop & glow ---- */
+button:not(.navitem):not(.modebtn):not(.right-action):not(.close) {
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+button:not(.navitem):not(.modebtn):not(.right-action):not(.close):hover {
+  transform: scale(1.06);
+  box-shadow: 0 6px 30px rgba(92, 145, 173, 0.35);
+}
+
+/* ---- Fade-in on page load ---- */
+.glass {
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards;
+}
+.hero { opacity: 0; animation: heroFade 1s ease forwards; }
+.natural { opacity: 0; animation: slideIn 0.8s ease forwards; animation-delay: 0.3s; }
+.bottom-metrics .tile { opacity: 0; animation: fadeIn 0.8s ease forwards; animation-delay: 0.2s; }
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroFade {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  0% { opacity: 0; transform: translateX(-30px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* ---- Score ring pulse on hover ---- */
+.score {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.score:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 50px rgba(92, 145, 173, 0.25);
+}
+
+/* ---- Reduced motion fallback ---- */
+@media (prefers-reduced-motion: reduce) {
+  .glass, .hero, .natural, .bottom-metrics .tile { opacity: 1; animation: none; }
+  .metric:hover, .property-card:hover { transform: none; box-shadow: none; }
+  button:not(.navitem):not(.modebtn):not(.right-action):not(.close):hover {
+    transform: none; box-shadow: none;
+  }
+  .score:hover { transform: none; box-shadow: none; }
+}
