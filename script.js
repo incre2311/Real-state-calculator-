@@ -3469,7 +3469,9 @@ function initialize() {
   const loadRight = document.getElementById('loadDeal');
   if (saveRight) saveRight.addEventListener('click', saveDeal);
   if (loadRight) loadRight.addEventListener('click', loadDeal);
-
+  // Manage Saved button (header)
+  const manageBtn = document.getElementById('manageSaved');
+  if (manageBtn) manageBtn.addEventListener('click', manageSaved);
 
   /*
    * Live number inputs.
