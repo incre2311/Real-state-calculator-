@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Glass Finance real estate investment underwriting and ROI analyzer.">
-<title>Real Estate Investment Analyzer · Glass Finance</title>
+<meta name="description" content="Crest Capital – real estate investment underwriting and ROI analyzer.">
+<title>Crest Capital · Real Estate Analyzer</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,36 +12,36 @@
   <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
   <div class="particle p1"></div><div class="particle p2"></div><div class="particle p3"></div>
   <div class="particle p4"></div><div class="particle p5"></div>
-  <!-- Data flow lines (for animation F) -->
+  <!-- Data flow lines -->
   <div class="flow-line"></div>
   <div class="flow-line" style="animation-delay:2s; width:70%; left:10%;"></div>
   <div class="flow-line" style="animation-delay:4s; width:50%; left:60%;"></div>
 
   <div class="wrap">
     <header class="nav glass">
-  <div class="brand">
-  <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:8px; color:var(--blue);">
-    <path d="M16 4 L4 10 L4 18 C4 24 16 30 16 30 C16 30 28 24 28 18 L28 10 L16 4Z" />
-    <path d="M12 20 L12 14 L20 14 L20 20" />
-    <path d="M10 18 L16 12 L22 18" />
-    <path d="M16 22 L16 28 M13 26 L16 22 L19 26" />
-  </svg>
-  CREST CAPITAL
-</div>
-  <div class="nav-right">
-    <select id="currencySelect" style="background:#ffffff55; border:1px solid #fff; border-radius:8px; padding:4px 8px; font-size:9px; color:#5f7480;">
-      <option value="₹">₹ INR</option>
-      <option value="$">$ USD</option>
-      <option value="€">€ EUR</option>
-      <option value="£">£ GBP</option>
-    </select>
-    <button id="saveDealHeader" class="ghost" style="padding:4px 10px;">💾 Save</button>
-    <button id="loadDealHeader" class="ghost" style="padding:4px 10px;">📂 Load</button>
-    <button id="manageSaved" class="ghost" style="padding:4px 10px;">📁 Manage Saved</button>
-    <span id="saveStatus">● LIVE MODEL</span>
-    <button id="reset" class="ghost">Reset</button>
-  </div>
-</header>
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:8px; color:var(--blue);">
+          <path d="M16 4 L4 10 L4 18 C4 24 16 30 16 30 C16 30 28 24 28 18 L28 10 L16 4Z" />
+          <path d="M12 20 L12 14 L20 14 L20 20" />
+          <path d="M10 18 L16 12 L22 18" />
+          <path d="M16 22 L16 28 M13 26 L16 22 L19 26" />
+        </svg>
+        CREST CAPITAL
+      </div>
+      <div class="nav-right">
+        <select id="currencySelect" style="background:#ffffff55; border:1px solid #fff; border-radius:8px; padding:4px 8px; font-size:9px; color:#5f7480;">
+          <option value="₹">₹ INR</option>
+          <option value="$">$ USD</option>
+          <option value="€">€ EUR</option>
+          <option value="£">£ GBP</option>
+        </select>
+        <button id="saveDealHeader" class="ghost" style="padding:4px 10px;">💾 Save</button>
+        <button id="loadDealHeader" class="ghost" style="padding:4px 10px;">📂 Load</button>
+        <button id="manageSaved" class="ghost" style="padding:4px 10px;">📁 Manage Saved</button>
+        <span id="saveStatus">● LIVE MODEL</span>
+        <button id="reset" class="ghost">Reset</button>
+      </div>
+    </header>
 
     <section class="hero">
       <div class="eyebrow">INVESTMENT UNDERWRITING · PRO</div>
@@ -87,14 +87,14 @@
               <div class="score" id="scoreRing"><span id="scoreValue">78</span></div>
               <div class="score-copy"><b id="scoreLabel">Strong investment profile</b><span id="scoreReason">Cash flow, leverage and returns are currently working together.</span></div>
             </div>
-           <div class="metrics">
-             <div class="metric hover-depth-card"><span>CAP RATE</span><strong id="cap">—</strong></div>
-             <div class="metric hover-depth-card"><span>IRR</span><strong id="irr">—</strong></div>
-             <div class="metric hover-depth-card"><span>CASH-ON-CASH</span><strong id="coc">—</strong></div>
-             <div class="metric hover-depth-card"><span>MONTHLY CASH FLOW</span><strong id="cashflow">—</strong></div>
-             <div class="metric hover-depth-card"><span>EQUITY MULTIPLE</span><strong id="multiple">—</strong></div>
-             <div class="metric hover-depth-card"><span>EXIT EQUITY</span><strong id="equity">—</strong></div>
-          </div>
+            <div class="metrics">
+              <div class="metric"><span>CAP RATE</span><strong id="cap">—</strong></div>
+              <div class="metric"><span>IRR</span><strong id="irr">—</strong></div>
+              <div class="metric"><span>CASH-ON-CASH</span><strong id="coc">—</strong></div>
+              <div class="metric"><span>MONTHLY CASH FLOW</span><strong id="cashflow">—</strong></div>
+              <div class="metric"><span>EQUITY MULTIPLE</span><strong id="multiple">—</strong></div>
+              <div class="metric"><span>EXIT EQUITY</span><strong id="equity">—</strong></div>
+            </div>
           </div>
 
           <div class="chart-card">
