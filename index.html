@@ -141,6 +141,7 @@
         <section class="view hidden" data-view="yearly">
           <div class="section-heading"><div><span>MODEL OUTPUT</span><h2>Year-by-year underwriting.</h2></div><small id="yearCount">—</small></div>
           <div class="table-scroll"><table><thead><tr><th>Year</th><th>Property</th><th>Gross Rent</th><th>NOI</th><th>Debt Balance</th><th>Equity</th><th>Cash Flow</th></tr></thead><tbody id="rows"></tbody></table></div>
+          <!-- SECOND CHART -->
           <div class="chart-card" style="margin-top:15px;">
             <div class="chart-head"><span>ANNUAL CASH FLOW & NOI</span><span id="chart2Label">● LIVE</span></div>
             <div id="chart2" class="chart"></div>
@@ -171,6 +172,7 @@
           <button class="right-action" data-jump="calculator">Change assumptions <b>→</b></button>
           <button class="right-action" data-jump="scenario">Stress-test vacancy <b>→</b></button>
           <button class="right-action" data-jump="compare">Compare deal <b>→</b></button>
+          <!-- SAVE & LOAD BUTTONS -->
           <button class="right-action" id="saveDeal">Save current deal <b>💾</b></button>
           <button class="right-action" id="loadDeal">Load saved deal <b>📂</b></button>
         </div>
@@ -194,12 +196,14 @@
         <button data-query="rate">Mortgage rises 2%</button>
         <button data-query="why">Why is this deal strong?</button>
       </div>
+      <!-- FREE-TEXT CHAT INPUT -->
       <div style="display:flex; gap:8px; margin-top:8px;">
         <input id="chatInput" type="text" placeholder="Ask the model… (e.g. 'vacancy 10%')" style="flex:1; border:1px solid #fff; background:#ffffff80; border-radius:18px; padding:8px 14px; font-size:8px; color:#314b58; outline:none;">
         <button id="chatSend" style="border:1px solid #fff; background:#ffffff80; border-radius:18px; padding:8px 14px; font-size:8px; color:#314b58; cursor:pointer;">Ask</button>
       </div>
     </div>
 
+    <!-- ENHANCED DISCLAIMER -->
     <div class="note" style="background:#ffffff40; border-radius:12px; padding:12px; margin-top:20px; border:1px solid #fff; text-align:center; font-size:9px; color:#5a6f7a;">
       <strong>⚠️ Educational tool – not financial advice.</strong> Always verify assumptions, consult a professional, and perform your own due diligence before making any investment decisions.
     </div>
