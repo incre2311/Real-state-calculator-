@@ -4076,7 +4076,81 @@ function addAnimations() {
 
 // Call this after the page loads
 setTimeout(addAnimations, 100);
+/* =========================================================
+   FORCE PARTICLES TO STAY VISIBLE
+   ========================================================= */
 
+function createParticles() {
+  // Check if particles already exist
+  if (document.getElementById('particle-layer')) return;
+  
+  const layer = document.createElement('div');
+  layer.id = 'particle-layer';
+  layer.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  `;
+  
+  const dots = [
+    { left: '10%', size: '8px', delay: '0s', duration: '7s' },
+    { left: '30%', size: '6px', delay: '1s', duration: '9s' },
+    { left: '50%', size: '12px', delay: '2s', duration: '8s' },
+    { left: '70%', size: '5px', delay: '0.5s', duration: '6s' },
+    { left: '90%', size: '10px', delay: '3s', duration: '10s' },
+    { left: '20%', size: '7px', delay: '1.5s', duration: '11s' },
+    { left: '60%', size: '4px', delay: '2.5s', duration: '7s' },
+    { left: '80%', size: '9px', delay: '0.8s', duration: '9s' },
+    { left: '40%', size: '6px', delay: '3.5s', duration: '8s' },
+    { left: '15%', size: '11px', delay: '4s', duration: '12s' },
+  ];
+  
+  dots.forEach(d => {
+    const dot = document.createElement('div');
+    dot.style.cssText = `
+      position: absolute;
+      width: ${d.size};
+      height: ${d.size};
+      background: rgba(92, 145, 173, 0.25);
+      border-radius: 50%;
+      left: ${d.left};
+      top: 20%;
+      box-shadow: 0 0 20px rgba(92, 145, 173, 0.1);
+      animation: floatDot ${d.duration} ease-in-out ${d.delay} infinite;
+    `;
+    layer.appendChild(dot);
+  });
+  
+  document.body.appendChild(layer);
+  
+  // Add the keyframe animation if it doesn't exist
+  if (!document.getElementById('particle-keyframes')) {
+    const style = document.createElement('style');
+    style.id = 'particle-keyframes';
+    style.textContent = `
+      @keyframes floatDot {
+        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+        25% { transform: translate(30px, -40px) scale(1.3); opacity: 0.8; }
+        50% { transform: translate(-20px, -80px) scale(1); opacity: 0.5; }
+        75% { transform: translate(40px, -120px) scale(1.2); opacity: 0.9; }
+        100% { transform: translate(0, -160px) scale(0.8); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  console.log('✅ Particles created!');
+}
+
+// Run this after everything else loads
+setTimeout(createParticles, 500);
+// And again after 2 seconds to be safe
+setTimeout(createParticles, 2000);
 
 /* =========================================================
    START
