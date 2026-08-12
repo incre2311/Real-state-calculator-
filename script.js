@@ -1,7 +1,7 @@
 /*
  * GLASS FINANCE
  * Real Estate Investment Analyzer
- * Enhanced with currency selector, save/load, validation, and toasts.
+ * Complete – with Y-axis labels, tuner re-render, header save/load, validation.
  */
 
 "use strict";
@@ -12,7 +12,7 @@
 
 const $ = (id) => document.getElementById(id);
 
-// Global currency symbol – will be updated from dropdown
+// Global currency symbol – updated by dropdown
 window.currencySymbol = '₹';
 
 // Toast helper
@@ -1128,7 +1128,7 @@ function buildCalculatorFields() {
 
 
 /* =========================================================
-   GRAPHS
+   GRAPHS (with Y-axis labels)
    ========================================================= */
 
 function renderChart(rows) {
@@ -1160,10 +1160,22 @@ function renderChart(rows) {
     return element;
   }
 
-  // Grid lines
-  for (let i = 0; i < 4; i++) {
-    const gridY = top + plotHeight * i / 3;
+  // Grid lines and Y-axis labels
+  for (let i = 0; i <= 4; i++) {
+    const ratio = i / 4;
+    const gridY = top + plotHeight * (1 - ratio);
+    const labelY = gridY + 4;
     svg.appendChild(svgElement('line', { x1: left, y1: gridY, x2: W - right, y2: gridY, class: 'gridline' }));
+    // Y-axis label
+    const label = svgElement('text', {
+      x: left - 8,
+      y: labelY,
+      'text-anchor': 'end',
+      fill: '#71838d',
+      'font-size': '9'
+    });
+    label.textContent = money(maxValue * ratio);
+    svg.appendChild(label);
   }
 
   // Property value
@@ -1174,7 +1186,7 @@ function renderChart(rows) {
   const equityPoints = rows.map((row, index) => `${x(index)},${y(Math.max(0, row.equity))}`).join(' ');
   svg.appendChild(svgElement('polyline', { points: equityPoints, class: 'eq' }));
 
-  // Year labels
+  // X-axis year labels
   rows.forEach((row, index) => {
     if (index === 0 || index === rows.length - 1 || index % 5 === 0) {
       const label = svgElement('text', { x: x(index), y: H - 8, 'text-anchor': 'middle', fill: '#71838d', 'font-size': '9' });
@@ -1217,11 +1229,24 @@ function renderChart2(rows) {
     return e;
   }
 
-  // Grid
-  for (let i = 0; i < 5; i++) {
-    const yy = top + plotH * i / 4;
-    svg.appendChild(el('line', { x1: left, y1: yy, x2: W - right, y2: yy, class: 'gridline' }));
+  // Grid and Y-axis labels (for this chart, we show both positive and negative)
+  for (let i = 0; i <= 4; i++) {
+    const ratio = i / 4;
+    const value = -maxVal + ratio * 2 * maxVal;
+    const gridY = top + plotH * (1 - ratio);
+    const labelY = gridY + 4;
+    svg.appendChild(el('line', { x1: left, y1: gridY, x2: W - right, y2: gridY, class: 'gridline' }));
+    const label = el('text', {
+      x: left - 8,
+      y: labelY,
+      'text-anchor': 'end',
+      fill: '#71838d',
+      'font-size': '9'
+    });
+    label.textContent = money(value);
+    svg.appendChild(label);
   }
+
   // Zero line
   const zeroY = y(0);
   svg.appendChild(el('line', { x1: left, y1: zeroY, x2: W - right, y2: zeroY, stroke: '#66818e40', strokeWidth: 1 }));
@@ -1236,7 +1261,7 @@ function renderChart2(rows) {
   cfPath.setAttribute('stroke', 'var(--gold)');
   svg.appendChild(cfPath);
 
-  // Year labels
+  // X-axis year labels
   rows.forEach((r, i) => {
     if (i === 0 || i === rows.length - 1 || i % 5 === 0) {
       const label = el('text', { x: x(i), y: H - 8, 'text-anchor': 'middle', fill: '#71838d', 'font-size': '9' });
@@ -2437,7 +2462,7 @@ function updateUI(inputs, result) {
 
 
 /* =========================================================
-   INVESTMENT TUNER
+   INVESTMENT TUNER (now re-renders charts)
    ========================================================= */
 
 function updateTuner() {
@@ -2511,6 +2536,7 @@ function updateTuner() {
   );
 
 
+  // Update the slider background and knob
   const slider =
     document.querySelector(
       ".slider"
@@ -2539,6 +2565,11 @@ function updateTuner() {
     knob.style.left =
       value + "%";
   }
+
+
+  // *** NEW: Re‑render the charts with the stressed result ***
+  renderChart(result.rows);
+  renderChart2(result.rows);
 }
 
 
@@ -3329,13 +3360,18 @@ function initialize() {
 
 
   /*
-   * Save / Load buttons
+   * Save / Load buttons (header and right panel)
    */
 
-  const saveBtn = document.getElementById('saveDeal');
-  const loadBtn = document.getElementById('loadDeal');
-  if (saveBtn) saveBtn.addEventListener('click', saveDeal);
-  if (loadBtn) loadBtn.addEventListener('click', loadDeal);
+  const saveHeader = document.getElementById('saveDealHeader');
+  const loadHeader = document.getElementById('loadDealHeader');
+  if (saveHeader) saveHeader.addEventListener('click', saveDeal);
+  if (loadHeader) loadHeader.addEventListener('click', loadDeal);
+
+  const saveRight = document.getElementById('saveDeal');
+  const loadRight = document.getElementById('loadDeal');
+  if (saveRight) saveRight.addEventListener('click', saveDeal);
+  if (loadRight) loadRight.addEventListener('click', loadDeal);
 
 
   /*
