@@ -8,10 +8,15 @@ html, body {
   overflow: hidden;
 }
 .wrap {
-  padding: 18px 18px 0 18px;
+  padding: 18px 18px 0 18px; /* bottom padding is 0 */
 }
+/* Remove extra bottom margin from note */
 .note {
-  margin-bottom: 10px;
+  margin-bottom: 0 !important;
+}
+/* Ensure bottom-metrics has no extra margin */
+.bottom-metrics {
+  margin-bottom: 0;
 }
 *{box-sizing:border-box}
 :root{--ink:#263944;--muted:#73838c;--blue:#5c91ad;--green:#649b84;--gold:#a47b48;--line:#ffffffb8;--glass:#ffffff58;--soft:#e9f2f5}
@@ -37,7 +42,7 @@ button,input{font:inherit}
 .flow-line:nth-child(2){top:30%;width:30%;left:10%;animation-duration:14s}
 .flow-line:nth-child(3){top:60%;width:50%;left:50%;animation-duration:18s}
 @keyframes flowUp{0%{transform:translateY(80vh) scaleX(.5);opacity:0}30%{opacity:.6}70%{opacity:.4}100%{transform:translateY(-100vh) scaleX(1.2);opacity:0}}
-.wrap{position:relative;z-index:2;max-width:1250px;margin:auto;padding:18px}
+.wrap{position:relative;z-index:2;max-width:1250px;margin:auto;padding:18px 18px 0 18px}
 .glass{background:rgba(255,255,255,.39);border:1px solid var(--line);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);box-shadow:0 22px 60px rgba(70,96,110,.12);position:relative;overflow:hidden}
 .glass::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.12)50%,transparent 70%);pointer-events:none;z-index:1;animation:glassReflect 10s ease-in-out infinite;border-radius:inherit}
 @keyframes glassReflect{0%{transform:translateX(-100%) skewX(-20deg)}100%{transform:translateX(100%) skewX(-20deg)}}
@@ -86,9 +91,29 @@ button,input{font:inherit}
 .chart{height:205px}
 .chart svg{width:100%;height:100%}
 .gridline{stroke:#66818e20;stroke-width:1}
-.path{fill:none;stroke:#5c91ad;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 4.5s ease-out infinite alternate}
-.eq{fill:none;stroke:#649b84;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1000;stroke-dashoffset:1000;animation:draw 4.5s ease-out infinite alternate;animation-delay:.45s}
-@keyframes draw{to{stroke-dashoffset:0}}
+
+/* ---- CHART DRAW ANIMATION (draws once and stays) ---- */
+.path, .eq {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw 4.5s ease-out forwards; /* changed to forwards and removed alternate */
+}
+.path {
+  stroke: #5c91ad;
+  stroke-width: 4;
+}
+.eq {
+  stroke: #649b84;
+  stroke-width: 3;
+  animation-delay: .45s;
+}
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+
 .tuner{margin-top:10px;padding:14px;border-radius:16px;background:#ffffff55;border:1px solid #fff}
 .controlhead{display:flex;justify-content:space-between;font-size:8px;letter-spacing:.12em;color:#71818a}
 .controlhead b{color:#355e74}
@@ -110,7 +135,7 @@ button,input{font:inherit}
 .insight{padding:12px;border-radius:14px;background:#e5f1ec9e;border:1px solid #fff;color:#4c7565;font-size:9px;line-height:1.5}
 .right-action{display:flex;justify-content:space-between;width:100%;border:0;background:transparent;color:#5f7580;font-size:9px;padding:8px 0;cursor:pointer}
 .right-action b{font-weight:500}
-.bottom-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.bottom-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px;margin-bottom:0}
 .tile{padding:14px;border-radius:18px}
 .tile span{font-size:8px;color:#74858e}
 .tile strong{display:block;font:400 22px Georgia,serif;margin-top:6px}
@@ -174,7 +199,7 @@ tr:last-child td{border-bottom:0}
 .mini{padding:8px 5px;border-radius:10px;background:#ffffff55;text-align:center}
 .mini span{display:block;font-size:6px;color:#74858e}
 .mini b{font:400 16px Georgia,serif}
-.note{text-align:center;color:#7a8991;font-size:8px;letter-spacing:.06em;margin:15px}
+.note{text-align:center;color:#7a8991;font-size:8px;letter-spacing:.06em;margin:0 0 10px 0} /* changed bottom margin */
 .hidden{display:none!important}
 .mobile-tabs{display:none}
 .modal{position:fixed;inset:0;z-index:50}
