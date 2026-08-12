@@ -43,3 +43,95 @@ button,input{font:inherit}
 .mobile-tabs{display:none}.modal{position:fixed;inset:0;z-index:50}.modal-backdrop{position:absolute;inset:0;background:#31495555;backdrop-filter:blur(8px)}.modal-card{position:relative;max-width:560px;margin:12vh auto;padding:24px;border-radius:24px}.close{position:absolute;right:14px;top:12px;border:0;background:#ffffff66;border-radius:50%;width:28px;height:28px;color:#55717f;cursor:pointer}.modal-card h2{font:400 30px Georgia,serif;margin:0 0 9px}.modal-card p{font-size:10px;color:#6f818b;line-height:1.7}.modal-card ul{font-size:10px;color:#536b77;line-height:1.9}
 @media(max-width:1050px){.app-shell{grid-template-columns:180px minmax(0,1fr)}.right{display:none}.bottom-metrics{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:760px){.wrap{padding:12px}.hero{padding:45px 0 27px}.app-shell{display:block}.rail{display:none}.mobile-tabs{display:flex;gap:5px;margin-bottom:9px;overflow:auto}.mobile-tabs button{flex:1;min-width:65px;border:1px solid #fff;background:#ffffff55;color:#647782;border-radius:12px;padding:8px 5px;font-size:14px}.mobile-tabs button span{display:block;font-size:7px;margin-top:3px}.mobile-tabs button.active{background:#ffffffb8;color:#355e74}.metrics{grid-template-columns:repeat(2,1fr)}.quick-actions{grid-template-columns:1fr}.bottom-metrics{grid-template-columns:1fr 1fr}.natural{grid-template-columns:1fr}.chips{grid-column:auto}.form-grid,.scenario-grid,.compare-grid,.assumption-map{grid-template-columns:1fr}.section-heading{display:block}.section-heading small{display:block;margin-top:5px}.chart{height:180px}}
+/* ========================================================
+   CREST CAPITAL – PREMIUM ANIMATIONS (combo A–F)
+   ======================================================== */
+
+/* ---- A. Soft glow pulse for orbs ---- */
+.orb {
+  animation: pulseGlow 8s ease-in-out infinite alternate;
+}
+@keyframes pulseGlow {
+  0% { opacity: 0.35; transform: scale(1); }
+  100% { opacity: 0.6; transform: scale(1.08); }
+}
+/* Override existing orb animations to also include pulse */
+.o1 { animation: d1 18s ease-in-out infinite alternate, pulseGlow 8s ease-in-out infinite alternate; }
+.o2 { animation: d2 22s ease-in-out infinite alternate, pulseGlow 8s ease-in-out infinite alternate; }
+.o3 { animation: d3 20s ease-in-out infinite alternate, pulseGlow 8s ease-in-out infinite alternate; }
+
+/* ---- B. Gradient shimmer over .scene ---- */
+.scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 30%, rgba(255,255,255,0.04) 60%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+  animation: shimmer 14s linear infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%) scaleX(2); }
+  100% { transform: translateX(100%) scaleX(2); }
+}
+
+/* ---- C. Slow zoom / rotate on .scene ---- */
+.scene {
+  animation: breathe 30s ease-in-out infinite alternate;
+}
+@keyframes breathe {
+  0% { transform: scale(1) rotate(0deg); }
+  100% { transform: scale(1.02) rotate(1.2deg); }
+}
+
+/* ---- D. Floating particles with trails ---- */
+.particle {
+  box-shadow: 0 0 20px 8px rgba(255,255,255,0.15);
+  animation: float 14s linear infinite, trail 4s ease-in-out infinite alternate;
+}
+@keyframes trail {
+  0% { box-shadow: 0 0 10px 4px rgba(255,255,255,0.1); }
+  100% { box-shadow: 0 0 30px 12px rgba(255,255,255,0.25); }
+}
+
+/* ---- E. Glass reflection (moving highlight) ---- */
+.glass {
+  position: relative;
+  overflow: hidden;
+}
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.12) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  animation: glassReflect 10s ease-in-out infinite;
+  border-radius: inherit;
+}
+@keyframes glassReflect {
+  0% { transform: translateX(-100%) skewX(-20deg); }
+  100% { transform: translateX(100%) skewX(-20deg); }
+}
+
+/* ---- F. Data flow lines (thin glowing lines) ---- */
+.flow-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(100, 150, 200, 0.2), transparent);
+  width: 40%;
+  left: 30%;
+  top: 10%;
+  animation: flowUp 12s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+.flow-line:nth-child(1) { top: 10%; width: 40%; left: 30%; }
+.flow-line:nth-child(2) { top: 30%; width: 30%; left: 10%; animation-duration: 14s; }
+.flow-line:nth-child(3) { top: 60%; width: 50%; left: 50%; animation-duration: 18s; }
+@keyframes flowUp {
+  0% { transform: translateY(80vh) scaleX(0.5); opacity: 0; }
+  30% { opacity: 0.6; }
+  70% { opacity: 0.4; }
+  100% { transform: translateY(-100vh) scaleX(1.2); opacity: 0; }
+}
