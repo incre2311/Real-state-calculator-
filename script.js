@@ -3249,9 +3249,24 @@ function askModel(ruleName) {
 
 
 /* =========================================================
-   SAVE / LOAD DEAL
+   SAVE / LOAD / MANAGE DEALS (multiple)
    ========================================================= */
 
+// Get all saved deals from localStorage
+function getSavedDeals() {
+  try {
+    const raw = localStorage.getItem('glassFinanceDeals');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return [];
+}
+
+// Save deals array to localStorage
+function setSavedDeals(deals) {
+  localStorage.setItem('glassFinanceDeals', JSON.stringify(deals));
+}
+
+// Save current deal with a name
 function saveDeal() {
   const inputs = getInputs();
   const data = {
@@ -3259,44 +3274,126 @@ function saveDeal() {
     compareB: compareB,
     timestamp: new Date().toISOString()
   };
-  try {
-    localStorage.setItem('glassFinanceDeal', JSON.stringify(data));
-    showToast('Deal saved successfully!');
-  } catch (e) {
-    showToast('Failed to save deal.');
+
+  // Prompt for a name
+  let name = prompt('Enter a name for this deal:', 'Deal ' + new Date().toLocaleString());
+  if (name === null) return; // cancelled
+  name = name.trim() || 'Unnamed Deal';
+
+  const deals = getSavedDeals();
+  // Check if name already exists – ask to overwrite or rename
+  const existing = deals.find(d => d.name === name);
+  if (existing) {
+    if (!confirm(`A deal named "${name}" already exists. Overwrite?`)) {
+      saveDeal(); // retry with new name
+      return;
+    }
+    // Remove old entry
+    const index = deals.indexOf(existing);
+    deals.splice(index, 1);
   }
+
+  deals.push({ name, data, timestamp: data.timestamp });
+  setSavedDeals(deals);
+  showToast(`Deal "${name}" saved successfully!`);
 }
 
+// Load a deal by name (called from the manage modal or header)
+function loadDealByName(name) {
+  const deals = getSavedDeals();
+  const found = deals.find(d => d.name === name);
+  if (!found) {
+    showToast('Deal not found.');
+    return;
+  }
+  const data = found.data;
+  // Restore inputs
+  Object.keys(DEFAULTS).forEach(id => {
+    const el = $(id);
+    if (el && data.inputs[id] !== undefined) {
+      el.value = data.inputs[id];
+    }
+  });
+  if (data.compareB) {
+    compareB = data.compareB;
+  }
+  showToast(`Deal "${name}" loaded!`);
+  calculate();
+}
+
+// Load the most recently saved deal (for the header Load button)
 function loadDeal() {
-  try {
-    const raw = localStorage.getItem('glassFinanceDeal');
-    if (!raw) {
-      showToast('No saved deal found.');
-      return;
-    }
-    const data = JSON.parse(raw);
-    if (!data.inputs) {
-      showToast('Saved data is invalid.');
-      return;
-    }
-    // Restore inputs
-    Object.keys(DEFAULTS).forEach(id => {
-      const el = $(id);
-      if (el && data.inputs[id] !== undefined) {
-        el.value = data.inputs[id];
-      }
-    });
-    if (data.compareB) {
-      compareB = data.compareB;
-    }
-    showToast('Deal loaded successfully!');
-    calculate();
-  } catch (e) {
-    showToast('Error loading deal.');
+  const deals = getSavedDeals();
+  if (deals.length === 0) {
+    showToast('No saved deals found.');
+    return;
   }
+  // Load the most recent one (or show list?)
+  // For simplicity, load the first (or prompt to choose from manage)
+  // Better: open manageSaved() to let user choose.
+  manageSaved();
 }
 
+// Rename a saved deal
+function renameDeal(oldName) {
+  const deals = getSavedDeals();
+  const found = deals.find(d => d.name === oldName);
+  if (!found) {
+    showToast('Deal not found.');
+    return;
+  }
+  const newName = prompt('Rename deal to:', oldName);
+  if (newName === null) return;
+  const trimmed = newName.trim();
+  if (!trimmed) {
+    showToast('Name cannot be empty.');
+    return;
+  }
+  // Check for duplicate
+  if (trimmed !== oldName && deals.some(d => d.name === trimmed)) {
+    showToast(`A deal named "${trimmed}" already exists.`);
+    return;
+  }
+  found.name = trimmed;
+  setSavedDeals(deals);
+  showToast(`Deal renamed to "${trimmed}".`);
+  manageSaved(); // refresh list
+}
 
+// Delete a saved deal
+function deleteDeal(name) {
+  if (!confirm(`Delete deal "${name}"?`)) return;
+  let deals = getSavedDeals();
+  deals = deals.filter(d => d.name !== name);
+  setSavedDeals(deals);
+  showToast(`Deal "${name}" deleted.`);
+  manageSaved(); // refresh list
+}
+
+// Open the manage modal with a list of all saved deals
+function manageSaved() {
+  const deals = getSavedDeals();
+  if (deals.length === 0) {
+    openModal('Saved Deals', '<p>No saved deals yet. Save your current deal first.</p>');
+    return;
+  }
+
+  let listHtml = '<ul style="list-style:none; padding:0; margin:0;">';
+  deals.forEach(d => {
+    const date = new Date(d.timestamp).toLocaleString();
+    listHtml += `
+      <li style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #fff3;">
+        <span style="flex:1;"><strong>${d.name}</strong> <span style="font-size:9px; color:#6f818b;">(${date})</span></span>
+        <button onclick="loadDealByName('${d.name}')" class="smallbtn">Load</button>
+        <button onclick="renameDeal('${d.name}')" class="smallbtn">✏️</button>
+        <button onclick="deleteDeal('${d.name}')" class="smallbtn" style="color:#c0392b;">🗑</button>
+      </li>
+    `;
+  });
+  listHtml += '</ul>';
+
+  openModal('Saved Deals', listHtml);
+}
 /* =========================================================
    RESET
    ========================================================= */
