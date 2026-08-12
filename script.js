@@ -4163,6 +4163,98 @@ setInterval(function() {
     console.log('🔄 Particles re-added!');
   }
 }, 1000);
+/* =========================================================
+   BULLETPROOF PARTICLES – they can NEVER disappear
+   ========================================================= */
+
+function createPermanentParticles() {
+  // Remove old particles if they exist
+  const old = document.getElementById('permanent-particle-layer');
+  if (old) old.remove();
+
+  const layer = document.createElement('div');
+  layer.id = 'permanent-particle-layer';
+  layer.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999999;
+    overflow: hidden;
+  `;
+
+  const dots = [
+    { left: '10%', size: '8px', delay: '0s', duration: '7s' },
+    { left: '25%', size: '6px', delay: '1s', duration: '9s' },
+    { left: '40%', size: '12px', delay: '2s', duration: '8s' },
+    { left: '55%', size: '5px', delay: '0.5s', duration: '6s' },
+    { left: '70%', size: '10px', delay: '3s', duration: '10s' },
+    { left: '85%', size: '7px', delay: '1.5s', duration: '11s' },
+    { left: '15%', size: '4px', delay: '2.5s', duration: '7s' },
+    { left: '48%', size: '9px', delay: '0.8s', duration: '9s' },
+    { left: '62%', size: '6px', delay: '3.5s', duration: '8s' },
+    { left: '78%', size: '11px', delay: '4s', duration: '12s' },
+  ];
+
+  dots.forEach(d => {
+    const dot = document.createElement('div');
+    dot.style.cssText = `
+      position: absolute;
+      width: ${d.size};
+      height: ${d.size};
+      background: rgba(92, 145, 173, 0.25);
+      border-radius: 50%;
+      left: ${d.left};
+      top: 10%;
+      box-shadow: 0 0 20px rgba(92, 145, 173, 0.1);
+      animation: permFloat ${d.duration} ease-in-out ${d.delay} infinite;
+    `;
+    layer.appendChild(dot);
+  });
+
+  document.body.appendChild(layer);
+
+  // Add keyframes if missing
+  if (!document.getElementById('perm-float-keyframes')) {
+    const style = document.createElement('style');
+    style.id = 'perm-float-keyframes';
+    style.textContent = `
+      @keyframes permFloat {
+        0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+        25% { transform: translate(30px, -40px) scale(1.3); opacity: 0.8; }
+        50% { transform: translate(-20px, -80px) scale(1); opacity: 0.5; }
+        75% { transform: translate(40px, -120px) scale(1.2); opacity: 0.9; }
+        100% { transform: translate(0, -180px) scale(0.8); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  console.log('✅ Permanent particles created!');
+}
+
+// Create particles immediately
+createPermanentParticles();
+
+// And every 500ms, check if they still exist – if not, recreate them
+setInterval(function() {
+  if (!document.getElementById('permanent-particle-layer')) {
+    console.log('🔄 Particles disappeared – recreating...');
+    createPermanentParticles();
+  }
+}, 500);
+
+// Also after any UI update, we'll check again
+const originalUpdateUI = updateUI;
+if (typeof updateUI === 'function') {
+  updateUI = function(inputs, result) {
+    originalUpdateUI(inputs, result);
+    // Recreate particles after UI updates
+    setTimeout(createPermanentParticles, 50);
+  };
+}
 
 /* =========================================================
    START
