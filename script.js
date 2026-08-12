@@ -1,7 +1,7 @@
 /*
  * GLASS FINANCE
  * Real Estate Investment Analyzer
- * Complete client-side script with currency, save/load, validation, tooltips, and disclaimer.
+ * Complete, sellable version with currency, save/load, validation, tooltips & disclaimer.
  */
 
 "use strict";
@@ -72,57 +72,10 @@ let compareB = {
   selling: 6
 };
 
-// Currency symbol – default INR
+// Currency symbol – default INR (will be updated from dropdown)
 window.currencySymbol = '₹';
 
-/* =========================================================
-   HELPERS
-   ========================================================= */
-
-function readNumber(id) {
-
-  const element = $(id);
-
-  if (!element) {
-    return DEFAULTS[id] ?? 0;
-  }
-
-  const value = Number(element.value);
-
-  return Number.isFinite(value)
-    ? value
-    : DEFAULTS[id] ?? 0;
-}
-
-function setText(id, value) {
-  const element = $(id);
-  if (element) {
-    element.textContent = value;
-  }
-}
-
-function money(value) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) {
-    return window.currencySymbol + "0";
-  }
-  const symbol = window.currencySymbol || '₹';
-  return symbol + Math.round(number).toLocaleString("en-IN");
-}
-
-function percent(value) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) {
-    return "0.00%";
-  }
-  return number.toFixed(2) + "%";
-}
-
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
-
-// Toast notification
+// Toast helper
 function showToast(message) {
   let toast = document.getElementById('toast');
   if (!toast) {
@@ -143,6 +96,34 @@ function showToast(message) {
   toast._hideTimeout = setTimeout(() => {
     toast.style.opacity = '0';
   }, 3000);
+}
+
+function readNumber(id) {
+  const element = $(id);
+  if (!element) return DEFAULTS[id] ?? 0;
+  const value = Number(element.value);
+  return Number.isFinite(value) ? value : DEFAULTS[id] ?? 0;
+}
+
+function setText(id, value) {
+  const element = $(id);
+  if (element) element.textContent = value;
+}
+
+function money(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return (window.currencySymbol || '₹') + "0";
+  return (window.currencySymbol || '₹') + Math.round(number).toLocaleString("en-IN");
+}
+
+function percent(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return "0.00%";
+  return number.toFixed(2) + "%";
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
 /* =========================================================
@@ -176,7 +157,7 @@ function getInputs() {
 }
 
 /* =========================================================
-   MORTGAGE, IRR, MODEL – (unchanged from previous version)
+   MORTGAGE & IRR
    ========================================================= */
 
 function monthlyMortgagePayment(principal, annualRate, years) {
@@ -219,15 +200,15 @@ function calculateIRR(cashFlows) {
     const midNPV = npv(mid);
     if (!Number.isFinite(midNPV)) return 0;
     if (Math.abs(midNPV) < 0.000001) return mid;
-    if (lowNPV * midNPV <= 0) {
-      high = mid;
-    } else {
-      low = mid;
-      lowNPV = midNPV;
-    }
+    if (lowNPV * midNPV <= 0) high = mid;
+    else { low = mid; lowNPV = midNPV; }
   }
   return (low + high) / 2;
 }
+
+/* =========================================================
+   CORE MODEL
+   ========================================================= */
 
 function calculateModel(a) {
   const loan = a.price * (1 - a.down);
@@ -322,7 +303,6 @@ function calculateModel(a) {
 
   const yearOne = rows[0];
   const totalPositiveCash = cashFlows.slice(1).reduce((sum, v) => sum + Math.max(0, v), 0);
-  const totalProfit = cashFlows.reduce((sum, v) => sum + v, 0);
   const equityMultiple = initialCash > 0 ? totalPositiveCash / initialCash : 0;
   const irr = calculateIRR(cashFlows);
   const capRate = a.price > 0 ? yearOne.noi / a.price : 0;
@@ -342,7 +322,7 @@ function calculateModel(a) {
     initialCash,
     totalInterest,
     exitEquity,
-    totalProfit,
+    totalProfit: cashFlows.reduce((s, v) => s + v, 0),
     irr,
     equityMultiple,
     capRate,
@@ -363,8 +343,9 @@ function investmentScore(result) {
 }
 
 /* =========================================================
-   BUILD CALCULATOR FIELDS (unchanged)
+   BUILD CALCULATOR FIELDS
    ========================================================= */
+
 function buildCalculatorFields() {
   const container = $("calculatorFields");
   if (!container) return;
@@ -413,8 +394,9 @@ function buildCalculatorFields() {
 }
 
 /* =========================================================
-   GRAPHS (unchanged)
+   GRAPHS
    ========================================================= */
+
 function renderChart(rows) {
   const container = document.getElementById('chart');
   if (!container || !rows || !rows.length) { console.warn('Chart container not found or empty rows'); return; }
@@ -502,315 +484,239 @@ function renderChart2(rows) {
 }
 
 /* =========================================================
-   YEAR TABLE, RIGHT PANEL, SCENARIO, SENSITIVITY, ASSUMPTIONS, COMPARISON
-   (unchanged – keep your existing implementations)
-   ========================================================= */
-// I'll include the functions but to save space, assume they are identical to the previous version.
-// For brevity, I'll provide them in the final code block below.
-
-/* =========================================================
-   MAIN CALCULATION WITH VALIDATION
+   YEAR TABLE
    ========================================================= */
 
-function calculate() {
-  // Validate inputs – if any essential field is zero or negative, reset to defaults and show warning
-  const inputs = getInputs();
-  let invalid = false;
-  if (inputs.price <= 0) { invalid = true; showToast("Purchase price must be positive – reset to default."); }
-  if (inputs.rent <= 0) { invalid = true; showToast("Monthly rent must be positive – reset to default."); }
-  if (inputs.rate < 0) { invalid = true; showToast("Mortgage rate cannot be negative – reset to default."); }
-  if (invalid) {
-    // Reset all inputs to DEFAULTS
-    Object.entries(DEFAULTS).forEach(([id, value]) => {
-      const el = $(id);
-      if (el) el.value = value;
-    });
-    // Re‑read inputs
-    const fixedInputs = getInputs();
-    const result = calculateModel(fixedInputs);
-    updateUI(fixedInputs, result);
-    return;
-  }
-
-  const result = calculateModel(inputs);
-  updateUI(inputs, result);
+function renderYearTable(rows) {
+  const tbody = $("rows");
+  if (!tbody) return;
+  tbody.innerHTML = rows.map(row => `
+    <tr>
+      <td>${row.year}</td>
+      <td>${money(row.propertyValue)}</td>
+      <td>${money(row.grossRent)}</td>
+      <td>${money(row.noi)}</td>
+      <td>${money(row.debtBalance)}</td>
+      <td>${money(row.equity)}</td>
+      <td>${money(row.cashFlow)}</td>
+    </tr>
+  `).join("");
 }
 
-function updateUI(inputs, result) {
-  const score = investmentScore(result);
-
-  // Main metrics
-  setText("cap", percent(result.capRate * 100));
-  setText("irr", percent(result.irr * 100));
-  setText("coc", percent(result.cashOnCash * 100));
-  setText("cashflow", result.rows.length ? money(result.rows[0].cashFlow / 12) : "₹0");
-  setText("multiple", result.equityMultiple.toFixed(2) + "×");
-  setText("equity", money(result.exitEquity));
-
-  // Bottom metrics
-  setText("initialCash", money(result.initialCash));
-  setText("dscr", result.dscr.toFixed(2) + "×");
-  setText("breakEven", percent(result.breakEvenOccupancy * 100));
-  setText("ltv", percent(result.ltv * 100));
-
-  // Score
-  setText("scoreValue", score);
-  setText("scoreLabel",
-    score >= 75 ? "Strong investment profile" :
-    score >= 60 ? "Promising, with trade-offs" :
-    score >= 45 ? "Mixed investment profile" : "High-risk profile"
-  );
-  setText("scoreReason",
-    score >= 75 ? "Cash flow, leverage and returns are currently working together." :
-    score >= 60 ? "The deal has potential, but some assumptions deserve a stress test." :
-    score >= 45 ? "The model is sensitive to assumptions. Stress-test the downside." :
-    "The current assumptions do not provide enough return for the modeled risk."
-  );
-
-  // Score ring
-  const ring = $("scoreRing");
-  if (ring) {
-    ring.style.background = `conic-gradient(var(--blue) 0 ${score}%, #dce7eb ${score}% 100%)`;
-  }
-
-  // Hero
-  setText("dealSub", `${money(inputs.price)} purchase · ${money(inputs.rent)} monthly rent`);
-  setText("yearCount", `${inputs.hold} YEARS`);
-  setText("saveStatus", "● LIVE MODEL");
-
-  // Charts, table, panels
-  renderChart(result.rows);
-  renderChart2(result.rows);
-  renderYearTable(result.rows);
-  renderRightPanel(inputs, result);
-  renderScenarioCards(inputs);
-  renderSensitivity(inputs);
-  renderAssumptionMap(inputs);
-  renderComparison(result);
-  updateTuner();
-}
-
-// All rendering functions (renderYearTable, renderRightPanel, etc.) remain exactly as before.
-// I'll include them in the final code block.
-
 /* =========================================================
-   SAVE / LOAD
+   RIGHT PANEL
    ========================================================= */
 
-function saveDeal() {
-  const inputs = getInputs();
-  const data = {
-    inputs: inputs,
-    compareB: compareB,
-    timestamp: new Date().toISOString()
+function renderRightPanel(inputs, result) {
+  const assumptions = $("keyAssumptions");
+  if (assumptions) {
+    assumptions.innerHTML = [
+      ["Purchase price", money(inputs.price)],
+      ["Down payment", percent(inputs.down * 100)],
+      ["Mortgage", percent(inputs.rate)],
+      ["Vacancy", percent(inputs.vacancy * 100)],
+      ["Appreciation", percent(inputs.appreciation * 100)]
+    ].map(([label, value]) => `
+      <div class="field"><span>${label}</span><b>${value}</b></div>
+    `).join("");
+  }
+
+  const mini = $("miniScenarios");
+  if (mini) {
+    const conservative = scenarioModel(inputs, "Conservative");
+    const optimistic = scenarioModel(inputs, "Optimistic");
+    mini.innerHTML = [
+      ["DOWN", conservative],
+      ["BASE", result],
+      ["UPSIDE", optimistic]
+    ].map(([label, model]) => `
+      <div class="mini"><span>${label}</span><b>${percent(model.irr * 100)}</b></div>
+    `).join("");
+  }
+
+  const insight = $("whyItWorks");
+  if (insight) {
+    insight.textContent = result.dscr >= 1.2
+      ? `Debt coverage is healthy at ${result.dscr.toFixed(2)}×.`
+      : `Debt coverage is ${result.dscr.toFixed(2)}×. Cash flow is sensitive to the operating assumptions.`;
+  }
+}
+
+/* =========================================================
+   SCENARIO MODEL & CARDS
+   ========================================================= */
+
+function scenarioModel(inputs, type) {
+  const scenario = { ...inputs };
+  if (type === "Conservative") {
+    scenario.appreciation = Math.max(0, scenario.appreciation - 0.02);
+    scenario.rentgrowth = Math.max(0, scenario.rentgrowth - 0.015);
+    scenario.vacancy = Math.min(0.95, scenario.vacancy + 0.03);
+    scenario.exitcap += 0.01;
+  }
+  if (type === "Optimistic") {
+    scenario.appreciation += 0.02;
+    scenario.rentgrowth += 0.015;
+    scenario.vacancy = Math.max(0, scenario.vacancy - 0.02);
+    scenario.exitcap = Math.max(0.0001, scenario.exitcap - 0.01);
+  }
+  return calculateModel(scenario);
+}
+
+function renderScenarioCards(inputs) {
+  const container = $("scenarioCards");
+  if (!container) return;
+  container.innerHTML = ["Conservative", "Base", "Optimistic"].map(type => {
+    const result = type === "Base" ? calculateModel(inputs) : scenarioModel(inputs, type);
+    const finalYear = result.rows[result.rows.length - 1];
+    return `
+      <div class="scenario-card">
+        <h3>${type}</h3>
+        <div class="big">${percent(result.irr * 100)}</div>
+        <small>ANNUALIZED IRR</small>
+        <div class="scenario-row"><span>Exit equity</span><b>${money(result.exitEquity)}</b></div>
+        <div class="scenario-row"><span>Cash-on-cash</span><b>${percent(result.cashOnCash * 100)}</b></div>
+        <div class="scenario-row"><span>Equity multiple</span><b>${result.equityMultiple.toFixed(2)}×</b></div>
+        <div class="scenario-row"><span>Final property</span><b>${money(finalYear.propertyValue)}</b></div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* =========================================================
+   SENSITIVITY
+   ========================================================= */
+
+function renderSensitivity(inputs) {
+  const container = $("sensitivityRows");
+  if (!container) return;
+  const base = calculateModel(inputs);
+  const tests = [
+    ["Property appreciation",
+      calculateModel({ ...inputs, appreciation: inputs.appreciation + 0.01 }).irr - base.irr],
+    ["Rent growth",
+      calculateModel({ ...inputs, rentgrowth: inputs.rentgrowth + 0.01 }).irr - base.irr],
+    ["Vacancy",
+      base.irr - calculateModel({ ...inputs, vacancy: Math.min(0.95, inputs.vacancy + 0.01) }).irr],
+    ["Mortgage rate",
+      base.irr - calculateModel({ ...inputs, rate: inputs.rate + 1 }).irr]
+  ];
+  const maxImpact = Math.max(0.0001, ...tests.map(item => Math.abs(item[1])));
+  container.innerHTML = tests.map(([label, impact]) => {
+    const width = Math.min(100, Math.abs(impact) / maxImpact * 100);
+    return `
+      <div class="sensitivity-row">
+        <span>${label}</span>
+        <div class="bar"><i style="width:${width}%"></i></div>
+        <b>${impact >= 0 ? "+" : ""}${percent(impact * 100)}</b>
+      </div>
+    `;
+  }).join("");
+}
+
+/* =========================================================
+   ASSUMPTION MAP
+   ========================================================= */
+
+function renderAssumptionMap(inputs) {
+  const container = $("assumptionMap");
+  if (!container) return;
+  const groups = {
+    "ACQUISITION": [
+      ["Purchase price", money(inputs.price)],
+      ["Down payment", percent(inputs.down * 100)],
+      ["Closing costs", percent(inputs.closing * 100)],
+      ["Upfront costs", money(inputs.reno)]
+    ],
+    "FINANCING": [
+      ["Rate", percent(inputs.rate)],
+      ["Term", inputs.term + " years"],
+      ["Points", percent(inputs.points * 100)]
+    ],
+    "OPERATIONS": [
+      ["Monthly rent", money(inputs.rent)],
+      ["Vacancy", percent(inputs.vacancy * 100)],
+      ["Maintenance", percent(inputs.maint * 100)],
+      ["Management", percent(inputs.management * 100)],
+      ["CapEx", percent(inputs.capex * 100)],
+      ["Other expenses", money(inputs.other)]
+    ],
+    "GROWTH & EXIT": [
+      ["Appreciation", percent(inputs.appreciation * 100)],
+      ["Rent growth", percent(inputs.rentgrowth * 100)],
+      ["Expense growth", percent(inputs.expensegrowth * 100)],
+      ["Hold", inputs.hold + " years"],
+      ["Exit cap", percent(inputs.exitcap * 100)],
+      ["Selling costs", percent(inputs.selling * 100)]
+    ]
   };
-  try {
-    localStorage.setItem('glassFinanceDeal', JSON.stringify(data));
-    showToast('Deal saved successfully!');
-  } catch (e) {
-    showToast('Failed to save deal.');
-  }
+  container.innerHTML = Object.entries(groups).map(([group, values]) => `
+    <div class="assump">
+      <h3>${group}</h3>
+      ${values.map(([label, value]) => `
+        <div class="assump-row"><span>${label}</span><b>${value}</b></div>
+      `).join("")}
+    </div>
+  `).join("");
 }
 
-function loadDeal() {
-  try {
-    const raw = localStorage.getItem('glassFinanceDeal');
-    if (!raw) { showToast('No saved deal found.'); return; }
-    const data = JSON.parse(raw);
-    if (!data.inputs) { showToast('Saved data is invalid.'); return; }
-    // Restore inputs
-    Object.keys(DEFAULTS).forEach(id => {
-      const el = $(id);
-      if (el && data.inputs[id] !== undefined) {
-        el.value = data.inputs[id];
-      }
-    });
-    if (data.compareB) {
-      compareB = data.compareB;
-    }
-    showToast('Deal loaded successfully!');
-    calculate();
-  } catch (e) {
-    showToast('Error loading deal.');
+/* =========================================================
+   COMPARISON
+   ========================================================= */
+
+function renderComparison(current) {
+  const other = calculateModel(compareB);
+  setText("compareAName", "Current Property");
+  setText("compareBName", compareB.name);
+  setText("aIrr", percent(current.irr * 100));
+  setText("aCap", percent(current.capRate * 100));
+  setText("aCash", money(current.rows[0].cashFlow / 12));
+  setText("aEquity", money(current.exitEquity));
+  setText("bIrr", percent(other.irr * 100));
+  setText("bCap", percent(other.capRate * 100));
+  setText("bCash", money(other.rows[0].cashFlow / 12));
+  setText("bEquity", money(other.exitEquity));
+  const winner = $("winner");
+  if (!winner) return;
+  if (current.irr > other.irr) {
+    winner.textContent = `Property A leads on modeled IRR by ${percent((current.irr - other.irr) * 100)}.`;
+  } else if (other.irr > current.irr) {
+    winner.textContent = `Property B leads on modeled IRR by ${percent((other.irr - current.irr) * 100)}.`;
+  } else {
+    winner.textContent = "Both properties have the same modeled IRR.";
   }
 }
 
 /* =========================================================
-   CHATBOT RULES & DYNAMIC PARSER (unchanged – keep as in previous version)
+   TUNER
    ========================================================= */
-// I'll include them in the final code block.
+
+function updateTuner() {
+  const tuner = $("tuner");
+  if (!tuner) return;
+  const value = Number(tuner.value) || 50;
+  const inputs = getInputs();
+  const type = value < 34 ? "Conservative" : value > 66 ? "Optimistic" : "Base";
+  const result = type === "Base" ? calculateModel(inputs) : scenarioModel(inputs, type);
+  setText("tunerLabel", type.toUpperCase());
+  setText("tunerIrr", percent(result.irr * 100));
+  setText("tunerText",
+    type === "Conservative"
+      ? "Stress case: slower growth, higher vacancy and a softer exit."
+      : type === "Optimistic"
+        ? "Upside case: stronger growth, lower vacancy and a tighter exit."
+        : "Drag this to stress-test the entire investment."
+  );
+  const slider = document.querySelector(".slider");
+  if (slider) slider.style.background = `linear-gradient(90deg, #8aa9ba 0 ${value}%, #dce6ea ${value}% 100%)`;
+  const knob = document.querySelector(".knob");
+  if (knob) knob.style.left = value + "%";
+}
 
 /* =========================================================
-   INITIALIZATION
+   NAVIGATION
    ========================================================= */
 
-function initialize() {
-  buildCalculatorFields();
-
-  // Currency selector
-  const currencySelect = document.getElementById('currencySelect');
-  if (currencySelect) {
-    currencySelect.addEventListener('change', function() {
-      window.currencySymbol = this.value;
-      calculate(); // refresh all numbers
-    });
-    // Set default
-    window.currencySymbol = currencySelect.value;
-  }
-
-  // Save / Load buttons
-  const saveBtn = document.getElementById('saveDeal');
-  const loadBtn = document.getElementById('loadDeal');
-  if (saveBtn) saveBtn.addEventListener('click', saveDeal);
-  if (loadBtn) loadBtn.addEventListener('click', loadDeal);
-
-  // Live input events
-  document.addEventListener('input', event => {
-    const target = event.target;
-    if (target instanceof HTMLInputElement && target.type === 'number') {
-      calculate();
-    }
-    if (target instanceof HTMLInputElement && target.type === 'range') {
-      updateTuner();
-    }
-  });
-  document.addEventListener('change', event => {
-    const target = event.target;
-    if (target instanceof HTMLInputElement && target.type === 'number') {
-      calculate();
-    }
-  });
-
-  // Navigation
-  document.querySelectorAll('[data-section]').forEach(btn => {
-    btn.addEventListener('click', () => showView(btn.dataset.section));
-  });
-
-  // Mode buttons
-  document.querySelectorAll('.modebtn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const mode = btn.dataset.mode;
-      if (mode === 'calculator') showView('finance');
-      else if (mode === 'scenario') showView('scenarios');
-      else showView('property');
-    });
-  });
-
-  // Jump actions
-  document.querySelectorAll('[data-jump]').forEach(btn => {
-    btn.addEventListener('click', () => showView(btn.dataset.jump));
-  });
-
-  // Tuner
-  if ($('tuner')) {
-    $('tuner').addEventListener('input', updateTuner);
-  }
-
-  // Why score
-  if ($('whyScore')) {
-    $('whyScore').addEventListener('click', () => askModel('why'));
-  }
-
-  // Ask model
-  if ($('askModel')) {
-    $('askModel').addEventListener('click', () => askModel('rent'));
-  }
-
-  // Open compare
-  if ($('openCompare')) {
-    $('openCompare').addEventListener('click', () => showView('compare'));
-  }
-
-  // Chat chips
-  document.querySelectorAll('.chips button').forEach(btn => {
-    btn.addEventListener('click', () => askModel(btn.dataset.query));
-  });
-
-  // Chat input
-  const chatInput = document.getElementById('chatInput');
-  const chatSend = document.getElementById('chatSend');
-  if (chatInput && chatSend) {
-    const sendMessage = () => {
-      const text = chatInput.value.trim();
-      if (!text) return;
-      const dynamicResult = handleWhatIfQuestion(text);
-      if (dynamicResult) {
-        setText('questionText', dynamicResult.question);
-        const answerEl = $('answerText');
-        if (answerEl) answerEl.innerHTML = dynamicResult.answer;
-        openModal(dynamicResult.title, `<div>${dynamicResult.answer}</div>`);
-        chatInput.value = '';
-        return;
-      }
-      // fallback keyword matching
-      const lower = text.toLowerCase();
-      if (lower.includes('rent') || lower.includes('growth')) askModel('rent');
-      else if (lower.includes('vacancy')) askModel('vacancy');
-      else if (lower.includes('rate') || lower.includes('mortgage') || lower.includes('interest')) askModel('rate');
-      else if (lower.includes('why') || lower.includes('strong') || lower.includes('score')) askModel('why');
-      else if (lower.includes('expense') || lower.includes('operating') || lower.includes('cost')) askModel('expenses');
-      else if (lower.includes('exit') || lower.includes('cap rate')) askModel('exitcap');
-      else if (lower.includes('appreciation') || lower.includes('value')) askModel('appreciation');
-      else if (lower.includes('reno') || lower.includes('renovation') || lower.includes('budget')) askModel('reno');
-      else {
-        openModal('I didn\'t understand that', `<p>I can answer dynamic "what-if" questions like:</p>
-          <ul><li><i>"What if rent drops 5%?"</i></li>
-          <li><i>"What if vacancy rises to 8%?"</i></li>
-          <li><i>"What if expenses increase 10%?"</i></li>
-          <li><i>"What if appreciation falls to 2%?"</i></li>
-          <li><i>"What if exit cap goes to 7%?"</i></li>
-          <li><i>"What if renovation budget doubles?"</i></li>
-          <li><i>"What if mortgage rate goes up 1.5%?"</i></li></ul>
-          <p>Or use keywords: <b>rent, vacancy, rate, why, expenses, exitcap, appreciation, reno</b></p>`);
-      }
-      chatInput.value = '';
-    };
-    chatSend.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
-  }
-
-  // Reset
-  if ($('reset')) {
-    $('reset').addEventListener('click', resetCalculator);
-  }
-
-  // Modal close
-  if ($('closeModal')) {
-    $('closeModal').addEventListener('click', () => $('modal').classList.add('hidden'));
-  }
-  if ($('modal')) {
-    $('modal').addEventListener('click', event => {
-      if (event.target.classList.contains('modal-backdrop')) {
-        $('modal').classList.add('hidden');
-      }
-    });
-  }
-
-  // Copy deal
-  if ($('copyDeal')) {
-    $('copyDeal').addEventListener('click', () => {
-      compareB = { ...getInputs(), name: 'Copied Deal' };
-      calculate();
-      showView('compare');
-    });
-  }
-
-  // Initial calculation
-  calculate();
-  showView('property');
-}
-
-// Reset
-function resetCalculator() {
-  Object.entries(DEFAULTS).forEach(([id, value]) => {
-    const input = $(id);
-    if (input) input.value = value;
-  });
-  if ($('tuner')) $('tuner').value = 50;
-  calculate();
-}
-
-// Navigation
 const SECTION_TO_VIEW = {
   property: 'decision',
   finance: 'calculator',
@@ -834,7 +740,7 @@ function showView(section) {
   });
   let mode = 'decision';
   if (viewName === 'scenario') mode = 'scenario';
-  else if (['calculator','yearly','assumptions'].includes(viewName)) mode = 'calculator';
+  else if (['calculator', 'yearly', 'assumptions'].includes(viewName)) mode = 'calculator';
   document.querySelectorAll('.modebtn').forEach(btn => {
     btn.classList.toggle('on', btn.dataset.mode === mode);
   });
@@ -846,7 +752,10 @@ function showView(section) {
   console.log(`Active view: ${viewName} (from section: ${section})`);
 }
 
-// Modal
+/* =========================================================
+   MODAL
+   ========================================================= */
+
 function openModal(title, body) {
   const modal = $('modal');
   const content = $('modalContent');
@@ -856,8 +765,42 @@ function openModal(title, body) {
 }
 
 /* =========================================================
-   CHATBOT RULES (hardcoded) – same as before
+   SAVE / LOAD
    ========================================================= */
+
+function saveDeal() {
+  const inputs = getInputs();
+  const data = { inputs, compareB, timestamp: new Date().toISOString() };
+  try {
+    localStorage.setItem('glassFinanceDeal', JSON.stringify(data));
+    showToast('Deal saved successfully!');
+  } catch (e) {
+    showToast('Failed to save deal.');
+  }
+}
+
+function loadDeal() {
+  try {
+    const raw = localStorage.getItem('glassFinanceDeal');
+    if (!raw) { showToast('No saved deal found.'); return; }
+    const data = JSON.parse(raw);
+    if (!data.inputs) { showToast('Saved data is invalid.'); return; }
+    Object.keys(DEFAULTS).forEach(id => {
+      const el = $(id);
+      if (el && data.inputs[id] !== undefined) el.value = data.inputs[id];
+    });
+    if (data.compareB) compareB = data.compareB;
+    showToast('Deal loaded successfully!');
+    calculate();
+  } catch (e) {
+    showToast('Error loading deal.');
+  }
+}
+
+/* =========================================================
+   CHATBOT RULES (hardcoded)
+   ========================================================= */
+
 const CHAT_RULES = {
   rent: {
     title: "Rent Growth Analysis",
@@ -953,8 +896,9 @@ function askModel(ruleName) {
 }
 
 /* =========================================================
-   DYNAMIC WHAT-IF PARSER (same as previous)
+   DYNAMIC WHAT-IF PARSER
    ========================================================= */
+
 const VARIABLE_MAP = {
   rent: { key: 'rent', type: 'flat', label: 'monthly rent' },
   vacancy: { key: 'vacancy', type: 'percentage', label: 'vacancy rate' },
@@ -978,10 +922,7 @@ function parseQuestion(text) {
     reno: ['renovation', 'reno', 'budget', 'upfront', 'renovation budget']
   };
   for (const [key, patterns] of Object.entries(variablePatterns)) {
-    if (patterns.some(p => lower.includes(p))) {
-      variable = key;
-      break;
-    }
+    if (patterns.some(p => lower.includes(p))) { variable = key; break; }
   }
   if (!variable) return null;
 
@@ -1022,7 +963,6 @@ function parseQuestion(text) {
 function applyChange(inputs, parsed) {
   const { variable, direction, amount, isPercentage } = parsed;
   const newInputs = { ...inputs };
-
   switch (variable) {
     case 'rent':
       if (isPercentage) {
@@ -1137,12 +1077,248 @@ function handleWhatIfQuestion(text) {
   };
 }
 
-// Render functions – include the ones from your previous version (I'll paste them fully in the final downloadable code)
-// For brevity, I've omitted them here but they are exactly the same as before.
+/* =========================================================
+   MAIN CALCULATION WITH VALIDATION
+   ========================================================= */
+
+function calculate() {
+  const inputs = getInputs();
+  let invalid = false;
+  if (inputs.price <= 0) { invalid = true; showToast("Purchase price must be positive – reset to default."); }
+  if (inputs.rent <= 0) { invalid = true; showToast("Monthly rent must be positive – reset to default."); }
+  if (inputs.rate < 0) { invalid = true; showToast("Mortgage rate cannot be negative – reset to default."); }
+  if (invalid) {
+    Object.entries(DEFAULTS).forEach(([id, value]) => {
+      const el = $(id);
+      if (el) el.value = value;
+    });
+    const fixedInputs = getInputs();
+    const result = calculateModel(fixedInputs);
+    updateUI(fixedInputs, result);
+    return;
+  }
+  const result = calculateModel(inputs);
+  updateUI(inputs, result);
+}
+
+function updateUI(inputs, result) {
+  const score = investmentScore(result);
+
+  setText("cap", percent(result.capRate * 100));
+  setText("irr", percent(result.irr * 100));
+  setText("coc", percent(result.cashOnCash * 100));
+  setText("cashflow", result.rows.length ? money(result.rows[0].cashFlow / 12) : "₹0");
+  setText("multiple", result.equityMultiple.toFixed(2) + "×");
+  setText("equity", money(result.exitEquity));
+
+  setText("initialCash", money(result.initialCash));
+  setText("dscr", result.dscr.toFixed(2) + "×");
+  setText("breakEven", percent(result.breakEvenOccupancy * 100));
+  setText("ltv", percent(result.ltv * 100));
+
+  setText("scoreValue", score);
+  setText("scoreLabel",
+    score >= 75 ? "Strong investment profile" :
+    score >= 60 ? "Promising, with trade-offs" :
+    score >= 45 ? "Mixed investment profile" : "High-risk profile"
+  );
+  setText("scoreReason",
+    score >= 75 ? "Cash flow, leverage and returns are currently working together." :
+    score >= 60 ? "The deal has potential, but some assumptions deserve a stress test." :
+    score >= 45 ? "The model is sensitive to assumptions. Stress-test the downside." :
+    "The current assumptions do not provide enough return for the modeled risk."
+  );
+
+  const ring = $("scoreRing");
+  if (ring) {
+    ring.style.background = `conic-gradient(var(--blue) 0 ${score}%, #dce7eb ${score}% 100%)`;
+  }
+
+  setText("dealSub", `${money(inputs.price)} purchase · ${money(inputs.rent)} monthly rent`);
+  setText("yearCount", `${inputs.hold} YEARS`);
+  setText("saveStatus", "● LIVE MODEL");
+
+  renderChart(result.rows);
+  renderChart2(result.rows);
+  renderYearTable(result.rows);
+  renderRightPanel(inputs, result);
+  renderScenarioCards(inputs);
+  renderSensitivity(inputs);
+  renderAssumptionMap(inputs);
+  renderComparison(result);
+  updateTuner();
+}
+
+function resetCalculator() {
+  Object.entries(DEFAULTS).forEach(([id, value]) => {
+    const input = $(id);
+    if (input) input.value = value;
+  });
+  if ($('tuner')) $('tuner').value = 50;
+  calculate();
+}
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+function initialize() {
+  buildCalculatorFields();
+
+  // Currency selector
+  const currencySelect = document.getElementById('currencySelect');
+  if (currencySelect) {
+    currencySelect.addEventListener('change', function() {
+      window.currencySymbol = this.value;
+      calculate();
+    });
+    window.currencySymbol = currencySelect.value;
+  }
+
+  // Save / Load buttons
+  const saveBtn = document.getElementById('saveDeal');
+  const loadBtn = document.getElementById('loadDeal');
+  if (saveBtn) saveBtn.addEventListener('click', saveDeal);
+  if (loadBtn) loadBtn.addEventListener('click', loadDeal);
+
+  // Live input events
+  document.addEventListener('input', event => {
+    const target = event.target;
+    if (target instanceof HTMLInputElement && target.type === 'number') {
+      calculate();
+    }
+    if (target instanceof HTMLInputElement && target.type === 'range') {
+      updateTuner();
+    }
+  });
+  document.addEventListener('change', event => {
+    const target = event.target;
+    if (target instanceof HTMLInputElement && target.type === 'number') {
+      calculate();
+    }
+  });
+
+  // Navigation
+  document.querySelectorAll('[data-section]').forEach(btn => {
+    btn.addEventListener('click', () => showView(btn.dataset.section));
+  });
+
+  // Mode buttons
+  document.querySelectorAll('.modebtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      if (mode === 'calculator') showView('finance');
+      else if (mode === 'scenario') showView('scenarios');
+      else showView('property');
+    });
+  });
+
+  // Jump actions
+  document.querySelectorAll('[data-jump]').forEach(btn => {
+    btn.addEventListener('click', () => showView(btn.dataset.jump));
+  });
+
+  // Tuner
+  if ($('tuner')) {
+    $('tuner').addEventListener('input', updateTuner);
+  }
+
+  // Why score
+  if ($('whyScore')) {
+    $('whyScore').addEventListener('click', () => askModel('why'));
+  }
+
+  // Ask model
+  if ($('askModel')) {
+    $('askModel').addEventListener('click', () => askModel('rent'));
+  }
+
+  // Open compare
+  if ($('openCompare')) {
+    $('openCompare').addEventListener('click', () => showView('compare'));
+  }
+
+  // Chat chips
+  document.querySelectorAll('.chips button').forEach(btn => {
+    btn.addEventListener('click', () => askModel(btn.dataset.query));
+  });
+
+  // Chat input
+  const chatInput = document.getElementById('chatInput');
+  const chatSend = document.getElementById('chatSend');
+  if (chatInput && chatSend) {
+    const sendMessage = () => {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      const dynamicResult = handleWhatIfQuestion(text);
+      if (dynamicResult) {
+        setText('questionText', dynamicResult.question);
+        const answerEl = $('answerText');
+        if (answerEl) answerEl.innerHTML = dynamicResult.answer;
+        openModal(dynamicResult.title, `<div>${dynamicResult.answer}</div>`);
+        chatInput.value = '';
+        return;
+      }
+      const lower = text.toLowerCase();
+      if (lower.includes('rent') || lower.includes('growth')) askModel('rent');
+      else if (lower.includes('vacancy')) askModel('vacancy');
+      else if (lower.includes('rate') || lower.includes('mortgage') || lower.includes('interest')) askModel('rate');
+      else if (lower.includes('why') || lower.includes('strong') || lower.includes('score')) askModel('why');
+      else if (lower.includes('expense') || lower.includes('operating') || lower.includes('cost')) askModel('expenses');
+      else if (lower.includes('exit') || lower.includes('cap rate')) askModel('exitcap');
+      else if (lower.includes('appreciation') || lower.includes('value')) askModel('appreciation');
+      else if (lower.includes('reno') || lower.includes('renovation') || lower.includes('budget')) askModel('reno');
+      else {
+        openModal('I didn\'t understand that', `<p>I can answer dynamic "what-if" questions like:</p>
+          <ul><li><i>"What if rent drops 5%?"</i></li>
+          <li><i>"What if vacancy rises to 8%?"</i></li>
+          <li><i>"What if expenses increase 10%?"</i></li>
+          <li><i>"What if appreciation falls to 2%?"</i></li>
+          <li><i>"What if exit cap goes to 7%?"</i></li>
+          <li><i>"What if renovation budget doubles?"</i></li>
+          <li><i>"What if mortgage rate goes up 1.5%?"</i></li></ul>
+          <p>Or use keywords: <b>rent, vacancy, rate, why, expenses, exitcap, appreciation, reno</b></p>`);
+      }
+      chatInput.value = '';
+    };
+    chatSend.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+  }
+
+  // Reset
+  if ($('reset')) {
+    $('reset').addEventListener('click', resetCalculator);
+  }
+
+  // Modal close
+  if ($('closeModal')) {
+    $('closeModal').addEventListener('click', () => $('modal').classList.add('hidden'));
+  }
+  if ($('modal')) {
+    $('modal').addEventListener('click', event => {
+      if (event.target.classList.contains('modal-backdrop')) {
+        $('modal').classList.add('hidden');
+      }
+    });
+  }
+
+  // Copy deal
+  if ($('copyDeal')) {
+    $('copyDeal').addEventListener('click', () => {
+      compareB = { ...getInputs(), name: 'Copied Deal' };
+      calculate();
+      showView('compare');
+    });
+  }
+
+  calculate();
+  showView('property');
+}
 
 /* =========================================================
    START
    ========================================================= */
+
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initialize, { once: true });
 } else {
